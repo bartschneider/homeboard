@@ -10,10 +10,10 @@ import (
 
 // ConfigRequest represents a configuration update request
 type ConfigRequest struct {
-	RefreshInterval int            `json:"refresh_interval" validate:"min=1,max=1440"`
-	ServerPort      int            `json:"server_port" validate:"min=1024,max=65535"`
-	Title           string         `json:"title" validate:"required,max=100"`
-	Theme           config.Theme   `json:"theme" validate:"required"`
+	RefreshInterval int             `json:"refresh_interval" validate:"min=1,max=1440"`
+	ServerPort      int             `json:"server_port" validate:"min=1024,max=65535"`
+	Title           string          `json:"title" validate:"required,max=100"`
+	Theme           config.Theme    `json:"theme" validate:"required"`
 	Widgets         []config.Widget `json:"widgets" validate:"dive"`
 }
 
@@ -41,23 +41,23 @@ type WidgetTestRequest struct {
 
 // WidgetTestResponse represents a widget test result
 type WidgetTestResponse struct {
-	Success       bool          `json:"success"`
-	Output        string        `json:"output"`
-	Error         string        `json:"error,omitempty"`
-	ExecutionTime time.Duration `json:"execution_time"`
-	Timestamp     time.Time     `json:"timestamp"`
-	ValidationErrors []string   `json:"validation_errors,omitempty"`
+	Success          bool          `json:"success"`
+	Output           string        `json:"output"`
+	Error            string        `json:"error,omitempty"`
+	ExecutionTime    time.Duration `json:"execution_time"`
+	Timestamp        time.Time     `json:"timestamp"`
+	ValidationErrors []string      `json:"validation_errors,omitempty"`
 }
 
 // WidgetStatus represents widget runtime status
 type WidgetStatus struct {
-	Widget        config.Widget `json:"widget"`
-	Status        string        `json:"status"` // "active", "disabled", "error", "idle"
-	LastExecution time.Time     `json:"last_execution"`
-	ExecutionTime time.Duration `json:"execution_time"`
-	ErrorMessage  string        `json:"error_message,omitempty"`
-	SuccessRate   float64       `json:"success_rate"`
-	ExecutionCount int64        `json:"execution_count"`
+	Widget         config.Widget `json:"widget"`
+	Status         string        `json:"status"` // "active", "disabled", "error", "idle"
+	LastExecution  time.Time     `json:"last_execution"`
+	ExecutionTime  time.Duration `json:"execution_time"`
+	ErrorMessage   string        `json:"error_message,omitempty"`
+	SuccessRate    float64       `json:"success_rate"`
+	ExecutionCount int64         `json:"execution_count"`
 }
 
 // SystemStatus represents overall system status
@@ -92,9 +92,9 @@ type ValidationResult struct {
 
 // ValidationError represents a specific validation error
 type ValidationError struct {
-	Field   string `json:"field"`
-	Message string `json:"message"`
-	Code    string `json:"code"`
+	Field   string      `json:"field"`
+	Message string      `json:"message"`
+	Code    string      `json:"code"`
 	Value   interface{} `json:"value,omitempty"`
 }
 
@@ -108,10 +108,10 @@ type ErrorResponse struct {
 
 // LogEntry represents a log entry
 type LogEntry struct {
-	Timestamp time.Time `json:"timestamp"`
-	Level     string    `json:"level"`
-	Message   string    `json:"message"`
-	Component string    `json:"component"`
+	Timestamp time.Time              `json:"timestamp"`
+	Level     string                 `json:"level"`
+	Message   string                 `json:"message"`
+	Component string                 `json:"component"`
 	Details   map[string]interface{} `json:"details,omitempty"`
 }
 
@@ -135,12 +135,12 @@ type AdminMessage struct {
 
 // WebSocket message type constants
 const (
-	WSTypeConfigUpdate   = "config_update"
-	WSTypeWidgetStatus   = "widget_status"
-	WSTypeSystemMetrics  = "system_metrics"
-	WSTypeLogEntry       = "log_entry"
-	WSTypeError          = "error"
-	WSTypeNotification   = "notification"
+	WSTypeConfigUpdate  = "config_update"
+	WSTypeWidgetStatus  = "widget_status"
+	WSTypeSystemMetrics = "system_metrics"
+	WSTypeLogEntry      = "log_entry"
+	WSTypeError         = "error"
+	WSTypeNotification  = "notification"
 )
 
 // WidgetStatusUpdate represents a widget status change
@@ -162,17 +162,17 @@ type SystemMetricsUpdate struct {
 
 // NotificationMessage represents a notification
 type NotificationMessage struct {
-	ID       string    `json:"id"`
-	Type     string    `json:"type"` // "info", "warning", "error", "success"
-	Title    string    `json:"title"`
-	Message  string    `json:"message"`
-	Duration int       `json:"duration"` // Duration in seconds, 0 for persistent
+	ID       string               `json:"id"`
+	Type     string               `json:"type"` // "info", "warning", "error", "success"
+	Title    string               `json:"title"`
+	Message  string               `json:"message"`
+	Duration int                  `json:"duration"` // Duration in seconds, 0 for persistent
 	Actions  []NotificationAction `json:"actions,omitempty"`
 }
 
 // NotificationAction represents an action in a notification
 type NotificationAction struct {
-	Label string `json:"label"`
+	Label  string `json:"label"`
 	Action string `json:"action"`
 	Style  string `json:"style"` // "primary", "secondary", "danger"
 }
@@ -209,29 +209,29 @@ type PerformanceMetrics struct {
 
 // LoadTestConfig represents load test configuration
 type LoadTestConfig struct {
-	Duration     time.Duration `json:"duration"`
-	Concurrency  int           `json:"concurrency"`
-	RequestRate  int           `json:"request_rate"`
-	TargetURL    string        `json:"target_url"`
-	TestType     string        `json:"test_type"` // "load", "stress", "spike"
-	Scenarios    []TestScenario `json:"scenarios"`
+	Duration    time.Duration  `json:"duration"`
+	Concurrency int            `json:"concurrency"`
+	RequestRate int            `json:"request_rate"`
+	TargetURL   string         `json:"target_url"`
+	TestType    string         `json:"test_type"` // "load", "stress", "spike"
+	Scenarios   []TestScenario `json:"scenarios"`
 }
 
 // TestScenario represents a test scenario
 type TestScenario struct {
-	Name        string                 `json:"name"`
-	Weight      float64                `json:"weight"`
-	Endpoint    string                 `json:"endpoint"`
-	Method      string                 `json:"method"`
-	Headers     map[string]string      `json:"headers,omitempty"`
-	Body        string                 `json:"body,omitempty"`
-	Parameters  map[string]interface{} `json:"parameters,omitempty"`
-	Validation  []ValidationRule       `json:"validation,omitempty"`
+	Name       string                 `json:"name"`
+	Weight     float64                `json:"weight"`
+	Endpoint   string                 `json:"endpoint"`
+	Method     string                 `json:"method"`
+	Headers    map[string]string      `json:"headers,omitempty"`
+	Body       string                 `json:"body,omitempty"`
+	Parameters map[string]interface{} `json:"parameters,omitempty"`
+	Validation []ValidationRule       `json:"validation,omitempty"`
 }
 
 // ValidationRule represents a test validation rule
 type ValidationRule struct {
-	Type     string      `json:"type"`     // "status_code", "response_time", "content"
+	Type     string      `json:"type"` // "status_code", "response_time", "content"
 	Expected interface{} `json:"expected"`
 	Operator string      `json:"operator"` // "eq", "lt", "gt", "contains"
 }
@@ -279,35 +279,35 @@ type ThemeDefinition struct {
 
 // WidgetTemplate represents a widget template
 type WidgetTemplate struct {
-	ID           string                 `json:"id"`
-	Name         string                 `json:"name"`
-	Description  string                 `json:"description"`
-	Author       string                 `json:"author"`
-	Version      string                 `json:"version"`
-	CreatedAt    time.Time              `json:"created_at"`
-	UpdatedAt    time.Time              `json:"updated_at"`
-	Script       string                 `json:"script"`
-	Parameters   []ParameterDefinition  `json:"parameters"`
-	Dependencies []string               `json:"dependencies"`
-	Examples     []ConfigExample        `json:"examples"`
-	Category     string                 `json:"category"`
-	Tags         []string               `json:"tags,omitempty"`
-	Icon         string                 `json:"icon,omitempty"`
-	Screenshots  []string               `json:"screenshots,omitempty"`
+	ID           string                `json:"id"`
+	Name         string                `json:"name"`
+	Description  string                `json:"description"`
+	Author       string                `json:"author"`
+	Version      string                `json:"version"`
+	CreatedAt    time.Time             `json:"created_at"`
+	UpdatedAt    time.Time             `json:"updated_at"`
+	Script       string                `json:"script"`
+	Parameters   []ParameterDefinition `json:"parameters"`
+	Dependencies []string              `json:"dependencies"`
+	Examples     []ConfigExample       `json:"examples"`
+	Category     string                `json:"category"`
+	Tags         []string              `json:"tags,omitempty"`
+	Icon         string                `json:"icon,omitempty"`
+	Screenshots  []string              `json:"screenshots,omitempty"`
 }
 
 // ParameterDefinition represents a widget parameter definition
 type ParameterDefinition struct {
-	Name         string      `json:"name"`
-	Type         string      `json:"type"` // "string", "number", "boolean", "object", "array"
-	Description  string      `json:"description"`
-	Required     bool        `json:"required"`
-	Default      interface{} `json:"default,omitempty"`
-	Validation   string      `json:"validation,omitempty"`
-	Options      []string    `json:"options,omitempty"` // For enum types
-	Min          *float64    `json:"min,omitempty"`     // For number types
-	Max          *float64    `json:"max,omitempty"`     // For number types
-	Pattern      string      `json:"pattern,omitempty"` // For string validation
+	Name        string      `json:"name"`
+	Type        string      `json:"type"` // "string", "number", "boolean", "object", "array"
+	Description string      `json:"description"`
+	Required    bool        `json:"required"`
+	Default     interface{} `json:"default,omitempty"`
+	Validation  string      `json:"validation,omitempty"`
+	Options     []string    `json:"options,omitempty"` // For enum types
+	Min         *float64    `json:"min,omitempty"`     // For number types
+	Max         *float64    `json:"max,omitempty"`     // For number types
+	Pattern     string      `json:"pattern,omitempty"` // For string validation
 }
 
 // ConfigExample represents a configuration example
