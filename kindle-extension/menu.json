@@ -1,0 +1,16 @@
+{
+  "name": "E-Paper Dashboard",
+  "priority": 1,
+  "items": [
+    {
+      "name": "Launch Dashboard",
+      "priority": 1,
+      "action": "dashboard-launcher.sh"
+    },
+    {
+      "name": "Help",
+      "priority": 2,
+      "action": "help.sh"
+    }
+  ]
+}

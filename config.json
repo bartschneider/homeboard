@@ -1,0 +1,34 @@
+{
+  "refresh_interval": 15,
+  "server_port": 8081,
+  "title": "E-Paper Dashboard",
+  "theme": {
+    "font_family": "serif",
+    "font_size": "16px",
+    "background": "#ffffff",
+    "foreground": "#000000"
+  },
+  "widgets": [
+    {
+      "name": "Clock",
+      "script": "widgets/clock.py",
+      "enabled": true,
+      "timeout": 10,
+      "parameters": {
+        "format": "%Y-%m-%d %H:%M:%S",
+        "timezone": "Local"
+      }
+    },
+    {
+      "name": "System Status",
+      "script": "widgets/system.py",
+      "enabled": true,
+      "timeout": 15,
+      "parameters": {
+        "show_cpu": true,
+        "show_memory": true,
+        "show_disk": true
+      }
+    }
+  ]
+}
