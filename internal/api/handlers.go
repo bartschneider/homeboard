@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 
@@ -13,21 +14,35 @@ import (
 
 // APIHandlers contains all API handlers
 type APIHandlers struct {
-	clientRepo    *db.ClientRepository
-	widgetRepo    *db.WidgetRepository
-	dashboardRepo *db.DashboardRepository
-	llmService    *LLMService
-	rssService    *RSSService
+	clientRepo         *db.ClientRepository
+	widgetRepo         *db.WidgetRepository
+	dashboardRepo      *db.DashboardRepository
+	llmService         *LLMService
+	enhancedLLMService *EnhancedLLMService
+	rssService         *RSSService
+	previewService     *WidgetPreviewService
+	chatService        *ChatSessionService
+	adkService         *ADKIntegrationService
 }
 
 // NewAPIHandlers creates new API handlers
-func NewAPIHandlers(database *db.Database, geminiAPIKey string) *APIHandlers {
+func NewAPIHandlers(database *db.Database, geminiAPIKey string, adkServiceURL string) *APIHandlers {
+	llmService := NewLLMService(geminiAPIKey)
+	enhancedLLMService := NewEnhancedLLMService(geminiAPIKey)
+	rssService := NewRSSService()
+	chatService := NewChatSessionService(enhancedLLMService, rssService)
+	adkService := NewADKIntegrationService(adkServiceURL)
+
 	return &APIHandlers{
-		clientRepo:    db.NewClientRepository(database),
-		widgetRepo:    db.NewWidgetRepository(database),
-		dashboardRepo: db.NewDashboardRepository(database),
-		llmService:    NewLLMService(geminiAPIKey),
-		rssService:    NewRSSService(),
+		clientRepo:         db.NewClientRepository(database),
+		widgetRepo:         db.NewWidgetRepository(database),
+		dashboardRepo:      db.NewDashboardRepository(database),
+		llmService:         llmService,
+		enhancedLLMService: enhancedLLMService,
+		rssService:         rssService,
+		previewService:     NewWidgetPreviewService(llmService, enhancedLLMService, rssService),
+		chatService:        chatService,
+		adkService:         adkService,
 	}
 }
 
@@ -57,8 +72,11 @@ func (h *APIHandlers) RegisterRoutes(router *mux.Router) {
 	api.HandleFunc("/dashboards/{id:[0-9]+}/widgets/{widgetId:[0-9]+}", h.RemoveWidgetFromDashboard).Methods("DELETE")
 	api.HandleFunc("/dashboards/{id:[0-9]+}/widgets/reorder", h.ReorderDashboardWidgets).Methods("PUT")
 
-	// LLM proxy endpoint
+	// LLM proxy endpoints
 	api.HandleFunc("/llm/analyze", h.AnalyzeWithLLM).Methods("POST")
+	api.HandleFunc("/llm/enhanced", h.AnalyzeWithEnhancedLLM).Methods("POST")
+	api.HandleFunc("/llm/natural-language", h.GenerateFromNaturalLanguage).Methods("POST")
+	api.HandleFunc("/llm/openapi", h.ParseOpenAPISpec).Methods("POST")
 
 	// Widget templates endpoint
 	api.HandleFunc("/widgets/templates", h.GetWidgetTemplates).Methods("GET")
@@ -66,6 +84,14 @@ func (h *APIHandlers) RegisterRoutes(router *mux.Router) {
 	// RSS endpoints
 	api.HandleFunc("/rss/validate", h.ValidateRSSFeed).Methods("POST")
 	api.HandleFunc("/rss/preview", h.PreviewRSSFeed).Methods("POST")
+
+	// Widget preview endpoints
+	api.HandleFunc("/widgets/preview", h.PreviewWidget).Methods("POST")
+	api.HandleFunc("/widgets/validate", h.ValidateWidget).Methods("POST")
+
+	// Chat session endpoints
+	api.HandleFunc("/chat/widget-builder", h.ChatWidgetBuilder).Methods("POST")
+	api.HandleFunc("/chat/sessions/{sessionId}", h.GetChatSession).Methods("GET")
 
 	// Health endpoint
 	api.HandleFunc("/health", h.GetHealth).Methods("GET")
@@ -541,4 +567,198 @@ func (h *APIHandlers) GetHealth(w http.ResponseWriter, r *http.Request) {
 		"timestamp": "now",
 		"version":   "1.0.0",
 	})
+}
+
+// AnalyzeWithEnhancedLLM uses the enhanced LLM service with agent orchestration
+func (h *APIHandlers) AnalyzeWithEnhancedLLM(w http.ResponseWriter, r *http.Request) {
+	var request EnhancedAnalyzeRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		h.writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	response, err := h.enhancedLLMService.AnalyzeWithEnhancedAgents(request)
+	if err != nil {
+		h.writeError(w, fmt.Sprintf("Enhanced LLM analysis failed: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	h.writeJSON(w, response)
+}
+
+// GenerateFromNaturalLanguage creates widgets from natural language descriptions
+func (h *APIHandlers) GenerateFromNaturalLanguage(w http.ResponseWriter, r *http.Request) {
+	var request struct {
+		Description string                 `json:"description"`
+		Context     map[string]interface{} `json:"context,omitempty"`
+		UserIntent  string                 `json:"user_intent,omitempty"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		h.writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if request.Description == "" {
+		h.writeError(w, "Description is required", http.StatusBadRequest)
+		return
+	}
+
+	enhancedRequest := EnhancedAnalyzeRequest{
+		NaturalLanguage: request.Description,
+		Context:         request.Context,
+		UserIntent:      request.UserIntent,
+		AgentWorkflow:   "natural_language_widget_generation",
+	}
+
+	response, err := h.enhancedLLMService.AnalyzeWithEnhancedAgents(enhancedRequest)
+	if err != nil {
+		h.writeError(w, fmt.Sprintf("Natural language processing failed: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	h.writeJSON(w, response)
+}
+
+// ParseOpenAPISpec analyzes OpenAPI/Swagger specifications for widget generation
+func (h *APIHandlers) ParseOpenAPISpec(w http.ResponseWriter, r *http.Request) {
+	var request struct {
+		OpenAPISpec    interface{} `json:"openapi_spec"`
+		WidgetTemplate string      `json:"widget_template,omitempty"`
+		UserIntent     string      `json:"user_intent,omitempty"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		h.writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if request.OpenAPISpec == nil {
+		h.writeError(w, "OpenAPI specification is required", http.StatusBadRequest)
+		return
+	}
+
+	enhancedRequest := EnhancedAnalyzeRequest{
+		LLMAnalyzeRequest: db.LLMAnalyzeRequest{
+			WidgetTemplate: request.WidgetTemplate,
+		},
+		OpenAPISpec:   request.OpenAPISpec,
+		UserIntent:    request.UserIntent,
+		AgentWorkflow: "openapi_specification_parsing",
+	}
+
+	response, err := h.enhancedLLMService.AnalyzeWithEnhancedAgents(enhancedRequest)
+	if err != nil {
+		h.writeError(w, fmt.Sprintf("OpenAPI parsing failed: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	h.writeJSON(w, response)
+}
+
+// PreviewWidget generates a real-time widget preview
+func (h *APIHandlers) PreviewWidget(w http.ResponseWriter, r *http.Request) {
+	var request PreviewRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		h.writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if request.WidgetConfig == nil {
+		h.writeError(w, "Widget configuration is required", http.StatusBadRequest)
+		return
+	}
+
+	response, err := h.previewService.GeneratePreview(request)
+	if err != nil {
+		h.writeError(w, fmt.Sprintf("Preview generation failed: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	h.writeJSON(w, response)
+}
+
+// ValidateWidget validates widget configuration
+func (h *APIHandlers) ValidateWidget(w http.ResponseWriter, r *http.Request) {
+	var request struct {
+		WidgetConfig *db.Widget         `json:"widget_config"`
+		Template     *db.WidgetTemplate `json:"template,omitempty"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		h.writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if request.WidgetConfig == nil {
+		h.writeError(w, "Widget configuration is required", http.StatusBadRequest)
+		return
+	}
+
+	validation := h.previewService.validateWidget(request.WidgetConfig, request.Template)
+
+	h.writeJSON(w, map[string]interface{}{
+		"validation": validation,
+		"timestamp":  time.Now(),
+	})
+}
+
+// ChatWidgetBuilder handles chat messages using the ADK service
+func (h *APIHandlers) ChatWidgetBuilder(w http.ResponseWriter, r *http.Request) {
+	var request struct {
+		SessionID string                 `json:"session_id"`
+		UserID    string                 `json:"user_id"`
+		Message   string                 `json:"message"`
+		Context   map[string]interface{} `json:"context,omitempty"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		h.writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Validate required fields
+	if request.SessionID == "" {
+		request.SessionID = fmt.Sprintf("session_%d", time.Now().Unix())
+	}
+	if request.UserID == "" {
+		request.UserID = "default_user"
+	}
+	if request.Message == "" {
+		h.writeError(w, "Message is required", http.StatusBadRequest)
+		return
+	}
+
+	// Process message through ADK service
+	response, err := h.adkService.ProcessChatMessage(request.SessionID, request.UserID, request.Message, request.Context)
+	if err != nil {
+		h.writeError(w, fmt.Sprintf("ADK processing failed: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	h.writeJSON(w, response)
+}
+
+// GetChatSession retrieves session information from ADK service
+func (h *APIHandlers) GetChatSession(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	sessionID := vars["sessionId"]
+
+	if sessionID == "" {
+		h.writeError(w, "Session ID is required", http.StatusBadRequest)
+		return
+	}
+
+	sessionInfo, err := h.adkService.GetSession(sessionID)
+	if err != nil {
+		h.writeError(w, fmt.Sprintf("Failed to get session: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	if sessionInfo == nil {
+		h.writeError(w, "Session not found", http.StatusNotFound)
+		return
+	}
+
+	h.writeJSON(w, sessionInfo)
 }

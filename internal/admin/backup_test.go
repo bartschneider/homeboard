@@ -454,7 +454,7 @@ func TestBackupManagerErrors(t *testing.T) {
 	t.Run("ExportNonExistentBackup", func(t *testing.T) {
 		tempDir := t.TempDir()
 		exportPath := filepath.Join(tempDir, "export.json")
-		
+
 		err := backupManager.ExportBackup("non_existent_backup", exportPath)
 		if err == nil {
 			t.Error("Expected error when exporting non-existent backup")
@@ -464,7 +464,7 @@ func TestBackupManagerErrors(t *testing.T) {
 	t.Run("ImportInvalidConfig", func(t *testing.T) {
 		tempDir := t.TempDir()
 		invalidPath := filepath.Join(tempDir, "invalid.json")
-		
+
 		// Create invalid JSON file
 		if err := os.WriteFile(invalidPath, []byte("invalid json"), 0644); err != nil {
 			t.Fatalf("Failed to create invalid file: %v", err)

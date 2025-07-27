@@ -24,10 +24,10 @@ type BackupManager struct {
 // NewBackupManager creates a new backup manager
 func NewBackupManager(configPath string) *BackupManager {
 	backupDir := filepath.Join(filepath.Dir(configPath), "backups")
-	
+
 	// Ensure backup directory exists
 	os.MkdirAll(backupDir, 0755)
-	
+
 	return &BackupManager{
 		configPath: configPath,
 		backupDir:  backupDir,
@@ -113,7 +113,7 @@ func (bm *BackupManager) ListBackups() ([]BackupInfo, error) {
 
 		// Extract backup ID from filename
 		backupID := strings.TrimSuffix(file.Name(), ".json")
-		
+
 		// Get file info
 		info, err := file.Info()
 		if err != nil {
@@ -316,7 +316,7 @@ func (bm *BackupManager) ImportBackup(importPath, description string) (string, e
 // createBackupMetadata creates metadata for a backup
 func (bm *BackupManager) createBackupMetadata(backupID, backupPath string, data []byte) error {
 	checksum := bm.calculateChecksumFromData(data)
-	
+
 	metadata := BackupMetadata{
 		ID:          backupID,
 		Filename:    filepath.Base(backupPath),
@@ -336,7 +336,7 @@ func (bm *BackupManager) createBackupMetadata(backupID, backupPath string, data 
 // loadBackupMetadata loads metadata for a backup
 func (bm *BackupManager) loadBackupMetadata(backupID string) *BackupMetadata {
 	metadataPath := filepath.Join(bm.backupDir, fmt.Sprintf("%s.meta", backupID))
-	
+
 	data, err := os.ReadFile(metadataPath)
 	if err != nil {
 		return nil
@@ -353,7 +353,7 @@ func (bm *BackupManager) loadBackupMetadata(backupID string) *BackupMetadata {
 // saveBackupMetadata saves metadata for a backup
 func (bm *BackupManager) saveBackupMetadata(backupID string, metadata *BackupMetadata) error {
 	metadataPath := filepath.Join(bm.backupDir, fmt.Sprintf("%s.meta", backupID))
-	
+
 	data, err := json.MarshalIndent(metadata, "", "  ")
 	if err != nil {
 		return err

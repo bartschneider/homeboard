@@ -1,0 +1,169 @@
+# Pre-commit hook configuration for E-Paper Dashboard
+# Enforces code quality, testing, and security across the entire project
+# No exceptions allowed - all checks must pass before commits are accepted
+
+repos:
+  # Go language hooks
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.1
+    hooks:
+      - id: go-fmt
+        name: "Go Format Check"
+        description: "Ensure Go code is properly formatted"
+        fail_fast: true
+
+      - id: go-imports
+        name: "Go Imports Check"
+        description: "Ensure Go imports are properly organized"
+        fail_fast: true
+
+      - id: go-vet
+        name: "Go Vet Analysis"
+        description: "Run go vet to catch potential issues"
+        fail_fast: true
+
+      - id: go-cyclo
+        name: "Go Cyclomatic Complexity"
+        description: "Check code complexity (max 15)"
+        args: [-over=15]
+        fail_fast: true
+
+      - id: go-mod-tidy
+        name: "Go Module Tidy"
+        description: "Ensure go.mod and go.sum are properly maintained"
+        fail_fast: true
+
+      - id: go-unit-tests
+        name: "Go Unit Tests"
+        description: "Run all Go unit tests - MUST PASS"
+        fail_fast: true
+        args: [-timeout=30s, -race, -coverprofile=coverage.out]
+
+  # Python hooks for widgets
+  - repo: local
+    hooks:
+      - id: check-python-syntax
+        name: "Python Syntax Check"
+        description: "Verify Python widget syntax"
+        entry: python3 -m py_compile
+        language: system
+        files: ^widgets/.*\.py$
+        fail_fast: true
+
+  # Python linting and formatting
+  - repo: https://github.com/psf/black
+    rev: 25.1.0
+    hooks:
+      - id: black
+        name: "Python Black Formatter"
+        description: "Format Python widget code"
+        files: ^widgets/.*\.py$
+        fail_fast: true
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.3.0
+    hooks:
+      - id: flake8
+        name: "Python Flake8 Linting"
+        description: "Lint Python widget code"
+        files: ^widgets/.*\.py$
+        fail_fast: true
+        args: [--max-line-length=88]
+
+  # Security and vulnerability scanning
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        name: "Secret Detection"
+        description: "Scan for accidentally committed secrets"
+        fail_fast: true
+        args: ['--baseline', '.secrets.baseline']
+        exclude: |
+          (?x)^(
+            .*\.lock$|
+            .*\.sum$|
+            coverage\.out$
+          )$
+
+  # File security and validation
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        name: "Large File Check"
+        description: "Prevent large files from being committed"
+        args: [--maxkb=1000]
+        fail_fast: true
+
+      - id: check-case-conflict
+        name: "Case Conflict Check"
+        description: "Prevent case-sensitive filename conflicts"
+        fail_fast: true
+
+      - id: check-merge-conflict
+        name: "Merge Conflict Check"
+        description: "Ensure no merge conflict markers remain"
+        fail_fast: true
+
+      - id: check-executables-have-shebangs
+        name: "Executable Shebang Check"
+        description: "Ensure executable files have proper shebangs"
+        fail_fast: true
+
+      - id: check-shebang-scripts-are-executable
+        name: "Shebang Executable Check"
+        description: "Ensure shebang scripts are executable"
+        fail_fast: true
+
+      - id: check-yaml
+        name: "YAML Validation"
+        description: "Validate YAML file syntax"
+        fail_fast: true
+
+      - id: check-json
+        name: "JSON Validation"
+        description: "Validate JSON configuration files"
+        fail_fast: true
+
+      - id: end-of-file-fixer
+        name: "EOF Newline Fix"
+        description: "Ensure files end with newline"
+        fail_fast: true
+
+      - id: trailing-whitespace
+        name: "Trailing Whitespace Fix"
+        description: "Remove trailing whitespace"
+        fail_fast: true
+
+  # Documentation and markup validation
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.45.0
+    hooks:
+      - id: markdownlint
+        name: "Markdown Linting"
+        description: "Lint Markdown documentation files"
+        fail_fast: true
+        args: [--fix]
+
+  # Additional Go security scanning (manual installation required)
+  - repo: local
+    hooks:
+      - id: gosec-security-scan
+        name: "Go Security Scan"
+        description: "Security vulnerability scanning for Go code"
+        entry: bash
+        language: system
+        args: [-c, 'if command -v gosec >/dev/null 2>&1; then gosec -quiet ./...; else echo "gosec not found, install with: go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest"; fi']
+        files: \.go$
+        fail_fast: true
+
+# Global configuration
+default_language_version:
+  python: python3
+
+# Fail fast - stop on first failure
+fail_fast: true
+
+# Minimum pre-commit version required
+minimum_pre_commit_version: "3.0.0"

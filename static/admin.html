@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Paper Dashboard Admin Panel</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #86868b;
+            font-size: 1.1rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #86868b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .nav-tab.active {
+            background: #007aff;
+            color: white;
+        }
+
+        .nav-tab:hover:not(.active) {
+            background: #f5f5f7;
+            color: #1d1d1f;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 24px;
+            border-bottom: 1px solid #e5e5e7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .card-content {
+            padding: 24px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #007aff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0051d0;
+        }
+
+        .btn-secondary {
+            background: #f5f5f7;
+            color: #1d1d1f;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e5e7;
+        }
+
+        .btn-danger {
+            background: #ff3b30;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #d70015;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #e5e5e7;
+        }
+
+        .table th {
+            background: #f5f5f7;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .table tbody tr:hover {
+            background: #f5f5f7;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-online {
+            background: #d1f2eb;
+            color: #00875a;
+        }
+
+        .status-offline {
+            background: #ffebe6;
+            color: #de350b;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #1d1d1f;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #007aff;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .wizard-steps {
+            display: flex;
+            margin-bottom: 32px;
+            background: #f5f5f7;
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .wizard-step {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .wizard-step.active {
+            background: #007aff;
+            color: white;
+        }
+
+        .wizard-step.completed {
+            background: #34c759;
+            color: white;
+        }
+
+        .wizard-content {
+            min-height: 300px;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .template-card {
+            border: 2px solid #e5e5e7;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .template-card:hover {
+            border-color: #007aff;
+        }
+
+        .template-card.selected {
+            border-color: #007aff;
+            background: #f0f8ff;
+        }
+
+        .template-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .template-card p {
+            color: #86868b;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+
+        .template-preview {
+            background: #f5f5f7;
+            padding: 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .mapping-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin: 20px 0;
+        }
+
+        .json-viewer {
+            background: #f5f5f7;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.9rem;
+            overflow: auto;
+            max-height: 400px;
+        }
+
+        .mapping-form {
+            space-y: 16px;
+        }
+
+        .mapping-field {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .mapping-field label {
+            min-width: 100px;
+            font-weight: 500;
+        }
+
+        .widget-preview {
+            background: #f5f5f7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-style: italic;
+            color: #86868b;
+        }
+
+        .ai-assistant {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .ai-assistant.hidden {
+            display: none;
+        }
+
+        .ai-assistant-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .ai-assistant-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .ai-assistant-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .ai-assistant-content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .ai-analyzing {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+        }
+
+        .ai-analyzing .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .ai-suggestions {
+            margin-top: 12px;
+        }
+
+        .ai-suggestion-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin: 6px 0;
+            font-size: 0.9rem;
+        }
+
+        .dashboard-canvas {
+            background: #f5f5f7;
+            border-radius: 8px;
+            padding: 24px;
+            min-height: 400px;
+            border: 2px dashed #d2d2d7;
+            margin: 20px 0;
+        }
+
+        .widget-library {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .widget-library-item {
+            background: white;
+            border: 1px solid #e5e5e7;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+
+        .widget-library-item:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .widget-library-item.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .canvas-widget {
+            background: white;
+            border: 1px solid #e5e5e7;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 8px;
+            cursor: move;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #86868b;
+        }
+
+        .error {
+            background: #ffebe6;
+            color: #de350b;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+
+        .success {
+            background: #d1f2eb;
+            color: #00875a;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 12px;
+            }
+
+            .mapping-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                overflow-x: auto;
+            }
+
+            .widget-library {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="admin-root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+
+        // API helper functions
+        const api = {
+            async get(endpoint) {
+                const response = await fetch(`/api${endpoint}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return await response.json();
+            },
+
+            async post(endpoint, data) {
+                const response = await fetch(`/api${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return await response.json();
+            },
+
+            async put(endpoint, data) {
+                const response = await fetch(`/api${endpoint}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return await response.json();
+            },
+
+            async delete(endpoint) {
+                const response = await fetch(`/api${endpoint}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return await response.json();
+            }
+        };
+
+        // Client Management Component
+        function ClientManagement() {
+            const [clients, setClients] = useState([]);
+            const [dashboards, setDashboards] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [error, setError] = useState('');
+
+            useEffect(() => {
+                loadData();
+            }, []);
+
+            const loadData = async () => {
+                try {
+                    setLoading(true);
+                    const [clientsData, dashboardsData] = await Promise.all([
+                        api.get('/clients'),
+                        api.get('/dashboards')
+                    ]);
+                    setClients(clientsData.clients || []);
+                    setDashboards(dashboardsData.dashboards || []);
+                } catch (err) {
+                    setError(`Failed to load data: ${err.message}`);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const assignDashboard = async (clientId, dashboardId) => {
+                try {
+                    await api.put(`/clients/${clientId}`, { dashboard_id: parseInt(dashboardId) });
+                    await loadData(); // Reload to see changes
+                } catch (err) {
+                    setError(`Failed to assign dashboard: ${err.message}`);
+                }
+            };
+
+            if (loading) return <div className="loading">Loading clients...</div>;
+
+            return (
+                <div className="content-card">
+                    <div className="card-header">
+                        <h2>Client Management</h2>
+                        <button className="btn btn-secondary" onClick={loadData}>
+                            🔄 Refresh
+                        </button>
+                    </div>
+                    <div className="card-content">
+                        {error && <div className="error">{error}</div>}
+                        
+                        {clients.length === 0 ? (
+                            <p>No clients have connected yet. Clients will appear here when they access the dashboard.</p>
+                        ) : (
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>IP Address</th>
+                                        <th>Last Seen</th>
+                                        <th>User Agent</th>
+                                        <th>Assigned Dashboard</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {clients.map(client => (
+                                        <tr key={client.id}>
+                                            <td>{client.ip_address}</td>
+                                            <td>{new Date(client.last_seen).toLocaleString()}</td>
+                                            <td style={{maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                                                {client.user_agent || 'Unknown'}
+                                            </td>
+                                            <td>
+                                                <select 
+                                                    className="form-select" 
+                                                    value={client.assigned_dashboard_id || ''}
+                                                    onChange={(e) => assignDashboard(client.id, e.target.value)}
+                                                    style={{width: 'auto', minWidth: '150px'}}
+                                                >
+                                                    <option value="">Default Dashboard</option>
+                                                    {dashboards.map(dashboard => (
+                                                        <option key={dashboard.id} value={dashboard.id}>
+                                                            {dashboard.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <span className="status-badge status-online">Online</span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // AI-Powered Widget Builder Component
+        function WidgetBuilder() {
+            // Core state
+            const [templates, setTemplates] = useState([]);
+            const [selectedTemplate, setSelectedTemplate] = useState(null);
+            const [widgetData, setWidgetData] = useState({
+                name: '',
+                api_url: '',
+                api_headers: {},
+                description: '',
+                timeout: 30,
+                enabled: true
+            });
+            const [mappingData, setMappingData] = useState({});
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState('');
+            const [success, setSuccess] = useState('');
+            
+            // Chat interface state
+            const [chatMessages, setChatMessages] = useState([
+                {
+                    type: 'ai',
+                    content: '👋 Hello! I\'m your AI Widget Builder assistant. Tell me what kind of widget you\'d like to create, or provide an API URL and I\'ll help you build the perfect widget for it.',
+                    timestamp: Date.now()
+                }
+            ]);
+            const [userInput, setUserInput] = useState('');
+            const [isTyping, setIsTyping] = useState(false);
+            const [sessionId, setSessionId] = useState(null); // ADK session ID
+            
+            // Workflow state
+            const [workflowPhase, setWorkflowPhase] = useState('discovery'); // discovery, configuration, validation, completion
+            const [apiValidation, setApiValidation] = useState({ status: 'idle', data: null });
+            const [aiSuggestions, setAiSuggestions] = useState({ templates: [], actions: [], suggestions: [] });
+            const [autoPopulatedFields, setAutoPopulatedFields] = useState([]);
+
+            useEffect(() => {
+                loadTemplates();
+            }, []);
+            
+            // Real-time API validation
+            useEffect(() => {
+                const validateAPI = async () => {
+                    if (widgetData.api_url && widgetData.api_url.startsWith('http')) {
+                        setApiValidation({ status: 'validating' });
+                        try {
+                            const response = await fetch(widgetData.api_url, { method: 'HEAD' });
+                            if (response.ok) {
+                                setApiValidation({ status: 'valid', data: { url: widgetData.api_url, status: response.status } });
+                                // Auto-analyze API in chat
+                                if (chatMessages.length <= 2) {
+                                    setTimeout(() => {
+                                        addAIMessage(`🎉 Great! I can see you've provided an API endpoint: ${widgetData.api_url}. Let me analyze it and suggest the best widget template for your data.`);
+                                        analyzeAPIAndSuggestTemplate();
+                                    }, 1000);
+                                }
+                            } else {
+                                setApiValidation({ status: 'error', error: `API returned ${response.status}` });
+                            }
+                        } catch (err) {
+                            setApiValidation({ status: 'error', error: err.message });
+                        }
+                    } else {
+                        setApiValidation({ status: 'idle' });
+                    }
+                };
+                
+                const debounceTimer = setTimeout(validateAPI, 1000);
+                return () => clearTimeout(debounceTimer);
+            }, [widgetData.api_url]);
+
+            const loadTemplates = async () => {
+                try {
+                    const data = await api.get('/widgets/templates');
+                    setTemplates(data.templates || []);
+                } catch (err) {
+                    setError(`Failed to load templates: ${err.message}`);
+                }
+            };
+            
+            // Chat functions
+            const addAIMessage = (content, actions = null) => {
+                setChatMessages(prev => [...prev, {
+                    type: 'ai',
+                    content,
+                    actions,
+                    timestamp: Date.now()
+                }]);
+            };
+            
+            const addUserMessage = (content) => {
+                setChatMessages(prev => [...prev, {
+                    type: 'user',
+                    content,
+                    timestamp: Date.now()
+                }]);
+            };
+
+            const processADKActions = (actions) => {
+                actions.forEach(action => {
+                    switch (action.type) {
+                        case 'template_suggestion':
+                            if (action.data && action.data.template) {
+                                const template = action.data.template;
+                                setSelectedTemplate(template);
+                                setAiSuggestions(prev => ({ 
+                                    ...prev, 
+                                    templates: [template] 
+                                }));
+                            }
+                            break;
+                        case 'auto_populate':
+                            if (action.data && action.data.widget) {
+                                const widget = action.data.widget;
+                                setWidgetData(prev => ({
+                                    ...prev,
+                                    ...widget
+                                }));
+                                if (widget.data_mapping) {
+                                    setMappingData(widget.data_mapping);
+                                }
+                            }
+                            break;
+                        case 'api_validation':
+                            if (action.data && action.data.validation) {
+                                setApiValidation({ 
+                                    status: 'valid', 
+                                    data: action.data.validation 
+                                });
+                            }
+                            break;
+                        case 'function_call':
+                            // Handle function calls from ADK agents
+                            if (action.data && action.data.function) {
+                                handleADKFunctionCall(action.data.function, action.data.args);
+                            }
+                            break;
+                        default:
+                            console.log('Unknown ADK action type:', action.type);
+                    }
+                });
+            };
+
+            const handleADKFunctionCall = (functionName, args) => {
+                switch (functionName) {
+                    case 'update_widget_config':
+                        setWidgetData(prev => ({ ...prev, ...args }));
+                        break;
+                    case 'select_template':
+                        const template = templates.find(t => t.type === args.template_type);
+                        if (template) {
+                            setSelectedTemplate(template);
+                        }
+                        break;
+                    case 'set_mapping':
+                        setMappingData(args.mapping || {});
+                        break;
+                    case 'advance_workflow':
+                        setWorkflowPhase(args.phase || 'configuration');
+                        break;
+                    default:
+                        console.log('Unknown ADK function call:', functionName);
+                }
+            };
+            
+            const sendChatMessage = async (message) => {
+                if (!message.trim()) return;
+                
+                addUserMessage(message);
+                setUserInput('');
+                setIsTyping(true);
+                
+                try {
+                    // Use ADK service for real interactive chat
+                    const response = await api.post('/chat/widget-builder', {
+                        session_id: sessionId || `session_${Date.now()}`,
+                        user_id: 'widget_builder_user',
+                        message: message,
+                        context: {
+                            widgetData,
+                            selectedTemplate,
+                            mappingData,
+                            workflowPhase,
+                            currentStep
+                        }
+                    });
+                    
+                    // Update session ID if new
+                    if (!sessionId) {
+                        setSessionId(response.session_id);
+                    }
+                    
+                    setTimeout(() => {
+                        setIsTyping(false);
+                        
+                        // Process ADK response
+                        const agentMessage = response.message;
+                        if (agentMessage) {
+                            const aiMessage = agentMessage.content || 'I\'ve analyzed your request.';
+                            const actions = agentMessage.actions || null;
+                            
+                            addAIMessage(aiMessage, actions);
+                            
+                            // Process ADK actions
+                            if (actions && actions.length > 0) {
+                                processADKActions(actions);
+                            }
+                            
+                            // Update workflow phase based on ADK response
+                            if (response.phase) {
+                                setWorkflowPhase(response.phase);
+                            }
+                            
+                            // Show suggestions from ADK
+                            if (response.next_suggestions && response.next_suggestions.length > 0) {
+                                setAiSuggestions(prev => ({ 
+                                    ...prev, 
+                                    suggestions: response.next_suggestions 
+                                }));
+                            }
+                        }
+                        
+                    }, 1000); // Reduced thinking time for real interaction
+                    
+                } catch (err) {
+                    setIsTyping(false);
+                    addAIMessage(`Sorry, I encountered an error: ${err.message}. Let me try to help you manually.`);
+                }
+            };
+            
+            const analyzeAPIAndSuggestTemplate = async () => {
+                if (!widgetData.api_url) return;
+                
+                setIsTyping(true);
+                try {
+                    const response = await api.post('/llm/enhanced', {
+                        apiUrl: widgetData.api_url,
+                        naturalLanguage: `Analyze this API endpoint and suggest the best widget template: ${widgetData.api_url}`,
+                        agentWorkflow: 'api_analysis_and_mapping',
+                        context: { autoAnalyze: true }
+                    });
+                    
+                    setTimeout(() => {
+                        setIsTyping(false);
+                        
+                        if (response.suggested_templates && response.suggested_templates.length > 0) {
+                            setAiSuggestions({ templates: response.suggested_templates, actions: [] });
+                            addAIMessage(
+                                `📊 Based on my analysis of your API, I recommend these widget templates. Click one to get started!`,
+                                response.suggested_templates
+                            );
+                        } else {
+                            addAIMessage('🔍 I analyzed your API. What specific data would you like to display in your widget?');
+                        }
+                        
+                        if (response.generated_widget) {
+                            applyAIRecommendations(response);
+                        }
+                    }, 2000);
+                    
+                } catch (err) {
+                    setIsTyping(false);
+                    addAIMessage(`I had trouble analyzing your API. Could you tell me what kind of data it provides?`);
+                }
+            };
+            
+            const applyAIRecommendations = (aiResponse) => {
+                if (aiResponse.generated_widget) {
+                    const widget = aiResponse.generated_widget;
+                    const fieldsToUpdate = [];
+                    
+                    if (widget.name && widget.name !== widgetData.name) {
+                        fieldsToUpdate.push('name');
+                    }
+                    if (widget.description && widget.description !== widgetData.description) {
+                        fieldsToUpdate.push('description');
+                    }
+                    
+                    setWidgetData(prev => ({
+                        ...prev,
+                        name: widget.name || prev.name,
+                        description: widget.description || prev.description,
+                        timeout: widget.timeout || prev.timeout
+                    }));
+                    
+                    if (widget.template_type) {
+                        const template = templates.find(t => t.type === widget.template_type);
+                        if (template) {
+                            setSelectedTemplate(template);
+                            fieldsToUpdate.push('template');
+                        }
+                    }
+                    
+                    if (widget.data_mapping) {
+                        setMappingData(widget.data_mapping);
+                        fieldsToUpdate.push('field mappings');
+                    }
+                    
+                    setAutoPopulatedFields(fieldsToUpdate);
+                    setWorkflowPhase('configuration');
+                }
+            };
+            
+            const selectTemplate = (template) => {
+                setSelectedTemplate(template);
+                setWorkflowPhase('configuration');
+                addUserMessage(`I want to use the ${template.name} template`);
+                addAIMessage(`Perfect! I\'ve selected the ${template.name} template. ${template.description} Let me help you configure it for your API data.`);
+                
+                if (widgetData.api_url) {
+                    // Auto-analyze API with selected template
+                    setTimeout(() => {
+                        analyzeAPIWithTemplate(template);
+                    }, 1000);
+                }
+            };
+            
+            const analyzeAPIWithTemplate = async (template) => {
+                setIsTyping(true);
+                try {
+                    const response = await api.post('/llm/enhanced', {
+                        apiUrl: widgetData.api_url,
+                        widgetTemplate: template.type,
+                        naturalLanguage: `Configure the ${template.name} template for this API: ${widgetData.api_url}`,
+                        agentWorkflow: 'comprehensive',
+                        context: { selectedTemplate: template }
+                    });
+                    
+                    setTimeout(() => {
+                        setIsTyping(false);
+                        
+                        if (response.generated_widget) {
+                            applyAIRecommendations(response);
+                            addAIMessage(
+                                `✨ I\'ve analyzed your API and auto-configured the ${template.name} template! I\'ve mapped the data fields and set up the widget. Review the configuration below and let me know if you\'d like any changes.`
+                            );
+                        } else {
+                            addAIMessage(`I\'ve set up the ${template.name} template. Could you help me understand what specific fields from your API you\'d like to display?`);
+                        }
+                    }, 2000);
+                    
+                } catch (err) {
+                    setIsTyping(false);
+                    addAIMessage(`Let me help you configure the ${template.name} template manually. What data fields would you like to display?`);
+                }
+            };
+
+            const callAIAssistant = async () => {
+                if (!enhancedMode && (!widgetData.api_url || !selectedTemplate)) return;
+                
+                try {
+                    setAiAssistant(prev => ({ ...prev, analyzing: true, show: true, message: 'AI Agent analyzing and generating optimal widget configuration...' }));
+                    
+                    let endpoint = '/llm/analyze';
+                    let requestBody = {
+                        apiUrl: widgetData.api_url,
+                        widgetTemplate: selectedTemplate?.type,
+                        apiHeaders: widgetData.api_headers
+                    };
+
+                    // Use enhanced LLM service if in enhanced mode
+                    if (enhancedMode) {
+                        endpoint = '/llm/enhanced';
+                        requestBody = {
+                            apiUrl: widgetData.api_url || '',
+                            widgetTemplate: selectedTemplate?.type || '',
+                            apiHeaders: widgetData.api_headers || {},
+                            naturalLanguage: naturalLanguageInput,
+                            openApiSpec: openAPISpec ? JSON.parse(openAPISpec) : null,
+                            agentWorkflow: agentWorkflow,
+                            context: {
+                                widgetName: widgetData.name,
+                                description: widgetData.description,
+                                enhancedMode: true
+                            }
+                        };
+                    }
+                    
+                    const response = await api.post(endpoint, requestBody);
+                    
+                    if (response.error) {
+                        setAiAssistant(prev => ({ 
+                            ...prev, 
+                            analyzing: false, 
+                            message: `AI Assistant encountered an issue: ${response.error}. You can still map fields manually.`,
+                            suggestions: null
+                        }));
+                        setApiResponse({
+                            sample: "No live data available",
+                            note: "Please map fields manually or check your API URL"
+                        });
+                    } else {
+                        // Handle enhanced response
+                        if (enhancedMode && response.generated_widget) {
+                            setWidgetData(prev => ({
+                                ...prev,
+                                name: response.generated_widget.name || prev.name,
+                                description: response.generated_widget.description || prev.description,
+                                template_type: response.generated_widget.template_type || prev.template_type
+                            }));
+                            
+                            if (response.generated_widget.template_type) {
+                                const template = templates.find(t => t.type === response.generated_widget.template_type);
+                                if (template) {
+                                    setSelectedTemplate(template);
+                                }
+                            }
+                        }
+
+                        setApiResponse(response.sampleData || response.apiData || response.api_data || {});
+                        setMappingData(response.dataMapping || response.data_mapping || {});
+                        setWorkflowResults(response.workflow_results);
+                        setAgentReasoning(response.agent_reasoning || []);
+                        
+                        let messageText = enhancedMode 
+                            ? `🤖 AI Assistant completed analysis! Workflow: ${response.agent_workflow || 'standard'}`
+                            : `AI Assistant successfully analyzed your API! I found ${Object.keys(response.dataMapping || response.data_mapping || {}).length} field mappings.`;
+                        
+                        if (response.agent_reasoning && response.agent_reasoning.length > 0) {
+                            messageText += ` Executed ${response.agent_reasoning.length} agent steps with ${Math.round(response.confidence * 100)}% confidence.`;
+                        }
+
+                        setAiAssistant(prev => ({ 
+                            ...prev, 
+                            analyzing: false, 
+                            suggestions: response,
+                            message: messageText
+                        }));
+                    }
+                    
+                } catch (err) {
+                    setAiAssistant(prev => ({ 
+                        ...prev, 
+                        analyzing: false, 
+                        message: `AI Assistant is unavailable: ${err.message}. You can still create widgets manually.`,
+                        suggestions: null
+                    }));
+                    setApiResponse({ error: "Could not fetch API data" });
+                }
+            };
+
+            const generateFromNaturalLanguage = async () => {
+                if (!naturalLanguageInput.trim()) return;
+                
+                try {
+                    setLoading(true);
+                    setAiAssistant(prev => ({ ...prev, analyzing: true, show: true, message: 'Generating widget from natural language description...' }));
+                    
+                    const response = await api.post('/llm/natural-language', {
+                        description: naturalLanguageInput,
+                        context: {
+                            mode: 'widget_generation',
+                            existing_data: widgetData
+                        }
+                    });
+                    
+                    if (response.generated_widget) {
+                        const widget = response.generated_widget;
+                        setWidgetData(prev => ({
+                            ...prev,
+                            name: widget.name || `Generated Widget`,
+                            description: widget.description || naturalLanguageInput,
+                            template_type: widget.template_type,
+                            api_url: widget.api_configuration?.url || ''
+                        }));
+                        
+                        if (widget.template_type) {
+                            const template = templates.find(t => t.type === widget.template_type);
+                            if (template) {
+                                setSelectedTemplate(template);
+                            }
+                        }
+                        
+                        if (widget.data_mapping) {
+                            setMappingData(widget.data_mapping);
+                        }
+                        
+                        setAgentReasoning(response.agent_reasoning || []);
+                        setCurrentStep(2); // Move to template selection
+                    }
+                    
+                    setAiAssistant(prev => ({ 
+                        ...prev, 
+                        analyzing: false,
+                        message: `🎯 Generated widget from description! ${response.agent_reasoning?.length || 0} reasoning steps completed.`
+                    }));
+                    
+                } catch (err) {
+                    setAiAssistant(prev => ({ 
+                        ...prev, 
+                        analyzing: false,
+                        message: `Failed to generate widget: ${err.message}`
+                    }));
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const testApiUrl = async () => {
+                if (!widgetData.api_url) return;
+                
+                try {
+                    setLoading(true);
+                    await callAIAssistant();
+                    setCurrentStep(3);
+                } catch (err) {
+                    setError(`Failed to test API: ${err.message}`);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const saveWidget = async () => {
+                if (!selectedTemplate || !widgetData.name) {
+                    addAIMessage('⚠️ I need at least a widget name and template to save your widget. Could you provide those?');
+                    return;
+                }
+
+                try {
+                    setLoading(true);
+                    addUserMessage('Save my widget');
+                    
+                    const widget = {
+                        ...widgetData,
+                        template_type: selectedTemplate.type,
+                        data_mapping: mappingData
+                    };
+
+                    await api.post('/widgets', widget);
+                    setSuccess('Widget created successfully!');
+                    addAIMessage(`🎉 Perfect! I've successfully created your "${widgetData.name}" widget. You can now add it to your dashboards or create another widget.`);
+                    
+                    setWorkflowPhase('completion');
+                    
+                    // Reset for new widget after delay
+                    setTimeout(() => {
+                        if (confirm('Would you like to create another widget?')) {
+                            resetBuilder();
+                        }
+                    }, 3000);
+                } catch (err) {
+                    setError(`Failed to save widget: ${err.message}`);
+                    addAIMessage(`❌ Sorry, I couldn't save your widget: ${err.message}. Let me help you fix any issues.`);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            
+            const resetBuilder = () => {
+                setSelectedTemplate(null);
+                setWidgetData({
+                    name: '',
+                    api_url: '',
+                    api_headers: {},
+                    description: '',
+                    timeout: 30,
+                    enabled: true
+                });
+                setMappingData({});
+                setApiValidation({ status: 'idle', data: null });
+                setAiSuggestions({ templates: [], actions: [] });
+                setAutoPopulatedFields([]);
+                setWorkflowPhase('discovery');
+                setError('');
+                setSuccess('');
+                setChatMessages([
+                    {
+                        type: 'ai',
+                        content: '👋 Ready to create another amazing widget! What would you like to build next?',
+                        timestamp: Date.now()
+                    }
+                ]);
+            };
+
+            const steps = [
+                { number: 1, title: 'Basic Info', active: currentStep === 1, completed: currentStep > 1 },
+                { number: 2, title: 'Template Selection', active: currentStep === 2, completed: currentStep > 2 },
+                { number: 3, title: 'AI Data Mapping', active: currentStep === 3, completed: currentStep > 3 },
+                { number: 4, title: 'Preview & Save', active: currentStep === 4, completed: false }
+            ];
+
+            return (
+                <div className="content-card">
+                    <div className="card-header">
+                        <h2>Widget Builder</h2>
+                        <div className="wizard-steps">
+                            {steps.map(step => (
+                                <div 
+                                    key={step.number}
+                                    className={`wizard-step ${step.active ? 'active' : ''} ${step.completed ? 'completed' : ''}`}
+                                >
+                                    {step.title}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="card-content">
+                        {error && <div className="error">{error}</div>}
+                        {success && <div className="success">{success}</div>}
+
+                        <div className="wizard-content">
+                            {currentStep === 1 && (
+                                <div>
+                                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+                                        <h3>Widget Information</h3>
+                                        <label style={{display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer'}}>
+                                            <input 
+                                                type="checkbox" 
+                                                checked={enhancedMode}
+                                                onChange={(e) => setEnhancedMode(e.target.checked)}
+                                            />
+                                            <span style={{fontWeight: '500', color: enhancedMode ? '#007aff' : '#666'}}>
+                                                🤖 Advanced Mode
+                                            </span>
+                                        </label>
+                                    </div>
+
+                                    {enhancedMode && (
+                                        <div className="ai-assistant" style={{marginBottom: '20px'}}>
+                                            <div className="ai-assistant-header">
+                                                <div className="ai-assistant-icon">🚀</div>
+                                                <h3 className="ai-assistant-title">Advanced Widget Generation</h3>
+                                            </div>
+                                            <div className="ai-assistant-content">
+                                                <div className="form-group">
+                                                    <label className="form-label">Natural Language Description</label>
+                                                    <textarea 
+                                                        className="form-textarea"
+                                                        value={naturalLanguageInput}
+                                                        onChange={(e) => setNaturalLanguageInput(e.target.value)}
+                                                        placeholder="Describe the widget you want to create, e.g., 'I want a weather widget that shows temperature and humidity for London'"
+                                                        style={{minHeight: '80px'}}
+                                                    />
+                                                </div>
+                                                
+                                                <div className="form-group">
+                                                    <label className="form-label">Agent Workflow</label>
+                                                    <select 
+                                                        className="form-select"
+                                                        value={agentWorkflow}
+                                                        onChange={(e) => setAgentWorkflow(e.target.value)}
+                                                    >
+                                                        <option value="comprehensive">Comprehensive Analysis (All Agents)</option>
+                                                        <option value="natural_language_widget_generation">Natural Language Processing</option>
+                                                        <option value="api_analysis_and_mapping">API Analysis & Mapping</option>
+                                                        <option value="openapi_specification_parsing">OpenAPI Specification</option>
+                                                    </select>
+                                                </div>
+
+                                                <div className="form-group">
+                                                    <label className="form-label">OpenAPI Specification (Optional)</label>
+                                                    <textarea 
+                                                        className="form-textarea"
+                                                        value={openAPISpec}
+                                                        onChange={(e) => setOpenAPISpec(e.target.value)}
+                                                        placeholder="Paste OpenAPI/Swagger JSON specification here..."
+                                                        style={{minHeight: '100px', fontFamily: 'monospace', fontSize: '0.9rem'}}
+                                                    />
+                                                </div>
+
+                                                {naturalLanguageInput && (
+                                                    <button 
+                                                        className="btn btn-primary"
+                                                        onClick={generateFromNaturalLanguage}
+                                                        disabled={loading}
+                                                        style={{marginTop: '12px'}}
+                                                    >
+                                                        {loading ? (
+                                                            <span style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                                                <div className="spinner" style={{width: '16px', height: '16px'}}></div>
+                                                                Generating...
+                                                            </span>
+                                                        ) : (
+                                                            '🎯 Generate Widget from Description'
+                                                        )}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="form-group">
+                                        <label className="form-label">Widget Name *</label>
+                                        <input 
+                                            type="text" 
+                                            className="form-input"
+                                            value={widgetData.name}
+                                            onChange={(e) => setWidgetData({...widgetData, name: e.target.value})}
+                                            placeholder="e.g., Weather Widget"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">API URL *</label>
+                                        <input 
+                                            type="url" 
+                                            className="form-input"
+                                            value={widgetData.api_url}
+                                            onChange={(e) => setWidgetData({...widgetData, api_url: e.target.value})}
+                                            placeholder="https://api.example.com/data"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Description</label>
+                                        <textarea 
+                                            className="form-textarea"
+                                            value={widgetData.description}
+                                            onChange={(e) => setWidgetData({...widgetData, description: e.target.value})}
+                                            placeholder="Brief description of what this widget displays"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Timeout (seconds)</label>
+                                        <input 
+                                            type="number" 
+                                            className="form-input"
+                                            value={widgetData.timeout}
+                                            onChange={(e) => setWidgetData({...widgetData, timeout: parseInt(e.target.value)})}
+                                            min="5"
+                                            max="120"
+                                        />
+                                    </div>
+                                    <div style={{display: 'flex', gap: '12px', marginTop: '20px'}}>
+                                        <button 
+                                            className="btn btn-primary"
+                                            onClick={() => setCurrentStep(2)}
+                                            disabled={!widgetData.name || !widgetData.api_url}
+                                        >
+                                            Next: Choose Template
+                                        </button>
+                                        {widgetData.api_url && (
+                                            <button 
+                                                className="btn btn-secondary"
+                                                onClick={() => {
+                                                    setAiAssistant({
+                                                        show: true,
+                                                        analyzing: false,
+                                                        suggestions: null,
+                                                        message: 'I can help analyze your API when you select a template in the next step!'
+                                                    });
+                                                }}
+                                                style={{display: 'flex', alignItems: 'center', gap: '6px'}}
+                                            >
+                                                🤖 AI Preview
+                                            </button>
+                                        )}
+                                    </div>
+                                    
+                                    {aiAssistant.show && currentStep === 1 && (
+                                        <div className="ai-assistant" style={{marginTop: '20px'}}>
+                                            <div className="ai-assistant-header">
+                                                <div className="ai-assistant-icon">🤖</div>
+                                                <h3 className="ai-assistant-title">AI Assistant</h3>
+                                            </div>
+                                            <div className="ai-assistant-content">
+                                                <p>Great! I can see you've entered an API URL: <code style={{background: 'rgba(255,255,255,0.2)', padding: '2px 6px', borderRadius: '4px'}}>{widgetData.api_url}</code></p>
+                                                <p>Once you choose a widget template in the next step, I'll be able to:</p>
+                                                <ul style={{margin: '8px 0', paddingLeft: '20px', fontSize: '0.9rem'}}>
+                                                    <li>Fetch and analyze your API data structure</li>
+                                                    <li>Automatically suggest field mappings</li>
+                                                    <li>Help you optimize the widget configuration</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {currentStep === 2 && (
+                                <div>
+                                    <h3>Choose Widget Template</h3>
+                                    <div className="template-grid">
+                                        {templates.map(template => (
+                                            <div 
+                                                key={template.type}
+                                                className={`template-card ${selectedTemplate?.type === template.type ? 'selected' : ''}`}
+                                                onClick={() => setSelectedTemplate(template)}
+                                            >
+                                                <h3>{template.name}</h3>
+                                                <p>{template.description}</p>
+                                                <div className="template-preview">{template.preview}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {selectedTemplate && (
+                                        <div className="ai-assistant">
+                                            <div className="ai-assistant-header">
+                                                <div className="ai-assistant-icon">🤖</div>
+                                                <h3 className="ai-assistant-title">AI Assistant Ready</h3>
+                                            </div>
+                                            <div className="ai-assistant-content">
+                                                <p>I'm ready to help you analyze your API and automatically map data fields to the <strong>{selectedTemplate.name}</strong> template!</p>
+                                                <p style={{margin: '8px 0', fontSize: '0.9rem', opacity: '0.9'}}>
+                                                    When you click "Next", I'll:
+                                                </p>
+                                                <ul style={{margin: '8px 0', paddingLeft: '20px', fontSize: '0.9rem', opacity: '0.9'}}>
+                                                    <li>Fetch data from your API endpoint</li>
+                                                    <li>Analyze the data structure</li>
+                                                    <li>Suggest optimal field mappings</li>
+                                                    <li>Generate a preview of your widget</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div style={{marginTop: '24px'}}>
+                                        <button 
+                                            className="btn btn-secondary"
+                                            onClick={() => setCurrentStep(1)}
+                                        >
+                                            Back
+                                        </button>
+                                        <button 
+                                            className="btn btn-primary"
+                                            onClick={testApiUrl}
+                                            disabled={!selectedTemplate || loading}
+                                            style={{marginLeft: '12px'}}
+                                        >
+                                            {loading ? (
+                                                <span style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                                    <div className="spinner" style={{width: '16px', height: '16px'}}></div>
+                                                    AI Analyzing...
+                                                </span>
+                                            ) : (
+                                                <>🚀 Next: AI Analysis & Data Mapping</>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {currentStep === 3 && (
+                                <div>
+                                    <h3>AI-Powered Data Mapping</h3>
+
+                                    {aiAssistant.show && (
+                                        <div className="ai-assistant">
+                                            <div className="ai-assistant-header">
+                                                <div className="ai-assistant-icon">🤖</div>
+                                                <h3 className="ai-assistant-title">AI Assistant</h3>
+                                            </div>
+                                            <div className="ai-assistant-content">
+                                                {aiAssistant.analyzing ? (
+                                                    <div className="ai-analyzing">
+                                                        <div className="spinner"></div>
+                                                        <span>{aiAssistant.message}</span>
+                                                    </div>
+                                                ) : (
+                                                    <div>
+                                                        <p>{aiAssistant.message}</p>
+                                                        {aiAssistant.suggestions && (
+                                                            <div className="ai-suggestions">
+                                                                <p style={{margin: '8px 0', fontWeight: '500'}}>💡 AI Analysis Results:</p>
+                                                                {aiAssistant.suggestions.reasoning && (
+                                                                    <div className="ai-suggestion-item">
+                                                                        <strong>Analysis:</strong> {aiAssistant.suggestions.reasoning}
+                                                                    </div>
+                                                                )}
+                                                                {Object.keys(mappingData).length > 0 && (
+                                                                    <div className="ai-suggestion-item">
+                                                                        <strong>Mapped Fields:</strong> {Object.keys(mappingData).join(', ')}
+                                                                    </div>
+                                                                )}
+                                                                {enhancedMode && agentReasoning.length > 0 && (
+                                                                    <div style={{marginTop: '12px'}}>
+                                                                        <p style={{fontWeight: '500', marginBottom: '8px'}}>🧠 Agent Reasoning Steps:</p>
+                                                                        {agentReasoning.slice(0, 3).map((step, index) => (
+                                                                            <div key={index} className="ai-suggestion-item">
+                                                                                <strong>{step.agent_name}:</strong> {step.reasoning}
+                                                                                {step.confidence && (
+                                                                                    <span style={{marginLeft: '8px', opacity: '0.7'}}>
+                                                                                        ({Math.round(step.confidence * 100)}% confidence)
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                        ))}
+                                                                        {agentReasoning.length > 3 && (
+                                                                            <div className="ai-suggestion-item" style={{fontStyle: 'italic', opacity: '0.8'}}>
+                                                                                + {agentReasoning.length - 3} more reasoning steps...
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                                {enhancedMode && workflowResults && (
+                                                                    <div className="ai-suggestion-item">
+                                                                        <strong>Workflow:</strong> {aiAssistant.suggestions.agent_workflow || 'AI Analysis'}
+                                                                        {aiAssistant.suggestions.confidence && (
+                                                                            <span style={{marginLeft: '8px'}}>
+                                                                                • Overall Confidence: {Math.round(aiAssistant.suggestions.confidence * 100)}%
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        <div style={{marginTop: '12px'}}>
+                                                            <button 
+                                                                className="btn btn-secondary"
+                                                                onClick={callAIAssistant}
+                                                                disabled={aiAssistant.analyzing}
+                                                                style={{fontSize: '0.9rem', padding: '8px 16px'}}
+                                                            >
+                                                                {enhancedMode ? '🚀 Re-analyze with AI' : '🔄 Re-analyze with AI'}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="mapping-panel">
+                                        <div>
+                                            <h4>API Response Preview</h4>
+                                            <div className="json-viewer">
+                                                {apiResponse ? (
+                                                    <pre>{JSON.stringify(apiResponse, null, 2)}</pre>
+                                                ) : (
+                                                    <p>No API response available</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4>Field Mapping {Object.keys(mappingData).length > 0 && <span style={{color: '#00875a'}}>✓ AI Mapped</span>}</h4>
+                                            <div className="mapping-form">
+                                                {selectedTemplate?.fields.map(field => (
+                                                    <div key={field.key} className="mapping-field">
+                                                        <label>{field.label}:</label>
+                                                        <input 
+                                                            type="text"
+                                                            className="form-input"
+                                                            value={mappingData[field.key] || ''}
+                                                            onChange={(e) => setMappingData({
+                                                                ...mappingData,
+                                                                [field.key]: e.target.value
+                                                            })}
+                                                            placeholder={field.placeholder}
+                                                            style={{
+                                                                borderColor: mappingData[field.key] ? '#00875a' : '#d2d2d7',
+                                                                background: mappingData[field.key] ? '#f0f8ff' : 'white'
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style={{marginTop: '24px'}}>
+                                        <button 
+                                            className="btn btn-secondary"
+                                            onClick={() => setCurrentStep(2)}
+                                        >
+                                            Back
+                                        </button>
+                                        <button 
+                                            className="btn btn-primary"
+                                            onClick={() => setCurrentStep(4)}
+                                            style={{marginLeft: '12px'}}
+                                        >
+                                            Next: Preview & Save
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {currentStep === 4 && (
+                                <div>
+                                    <h3>Preview & Save Widget</h3>
+                                    <div className="widget-preview">
+                                        <div>
+                                            <h4>{widgetData.name}</h4>
+                                            <p>Template: {selectedTemplate?.name}</p>
+                                            <p>API: {widgetData.api_url}</p>
+                                            <p>Mapping: {Object.keys(mappingData).length} fields mapped</p>
+                                        </div>
+                                    </div>
+                                    <div style={{marginTop: '24px'}}>
+                                        <button 
+                                            className="btn btn-secondary"
+                                            onClick={() => setCurrentStep(3)}
+                                        >
+                                            Back
+                                        </button>
+                                        <button 
+                                            className="btn btn-primary"
+                                            onClick={saveWidget}
+                                            disabled={loading}
+                                            style={{marginLeft: '12px'}}
+                                        >
+                                            {loading ? 'Saving...' : '💾 Save Widget'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Dashboard Canvas Component
+        function DashboardCanvas() {
+            const [dashboards, setDashboards] = useState([]);
+            const [widgets, setWidgets] = useState([]);
+            const [selectedDashboard, setSelectedDashboard] = useState(null);
+            const [dashboardWidgets, setDashboardWidgets] = useState([]);
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState('');
+            const [success, setSuccess] = useState('');
+            const [newDashboardName, setNewDashboardName] = useState('');
+
+            useEffect(() => {
+                loadData();
+            }, []);
+
+            const loadData = async () => {
+                try {
+                    setLoading(true);
+                    const [dashboardsData, widgetsData] = await Promise.all([
+                        api.get('/dashboards'),
+                        api.get('/widgets')
+                    ]);
+                    setDashboards(dashboardsData.dashboards || []);
+                    setWidgets(widgetsData.widgets || []);
+                } catch (err) {
+                    setError(`Failed to load data: ${err.message}`);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const loadDashboard = async (dashboardId) => {
+                try {
+                    const dashboard = await api.get(`/dashboards/${dashboardId}`);
+                    setSelectedDashboard(dashboard);
+                    setDashboardWidgets(dashboard.widgets || []);
+                } catch (err) {
+                    setError(`Failed to load dashboard: ${err.message}`);
+                }
+            };
+
+            const createDashboard = async () => {
+                if (!newDashboardName.trim()) return;
+
+                try {
+                    const dashboard = await api.post('/dashboards', {
+                        name: newDashboardName,
+                        description: `Dashboard created on ${new Date().toLocaleDateString()}`,
+                        is_default: false
+                    });
+                    setNewDashboardName('');
+                    await loadData();
+                    setSelectedDashboard(dashboard);
+                    setDashboardWidgets([]);
+                    setSuccess('Dashboard created successfully!');
+                } catch (err) {
+                    setError(`Failed to create dashboard: ${err.message}`);
+                }
+            };
+
+            const addWidgetToDashboard = async (widgetId) => {
+                if (!selectedDashboard) return;
+
+                try {
+                    await api.post(`/dashboards/${selectedDashboard.id}/widgets`, {
+                        widget_id: widgetId,
+                        display_order: dashboardWidgets.length + 1
+                    });
+                    await loadDashboard(selectedDashboard.id);
+                    setSuccess('Widget added to dashboard!');
+                } catch (err) {
+                    setError(`Failed to add widget: ${err.message}`);
+                }
+            };
+
+            const removeWidgetFromDashboard = async (widgetId) => {
+                if (!selectedDashboard) return;
+
+                try {
+                    await api.delete(`/dashboards/${selectedDashboard.id}/widgets/${widgetId}`);
+                    await loadDashboard(selectedDashboard.id);
+                    setSuccess('Widget removed from dashboard!');
+                } catch (err) {
+                    setError(`Failed to remove widget: ${err.message}`);
+                }
+            };
+
+            if (loading) return <div className="loading">Loading dashboard data...</div>;
+
+            return (
+                <div className="content-card">
+                    <div className="card-header">
+                        <h2>Dashboard Canvas</h2>
+                        <div style={{display: 'flex', gap: '12px', alignItems: 'center'}}>
+                            <input 
+                                type="text"
+                                placeholder="New dashboard name"
+                                value={newDashboardName}
+                                onChange={(e) => setNewDashboardName(e.target.value)}
+                                className="form-input"
+                                style={{width: '200px'}}
+                            />
+                            <button className="btn btn-primary" onClick={createDashboard}>
+                                ➕ Create Dashboard
+                            </button>
+                        </div>
+                    </div>
+                    <div className="card-content">
+                        {error && <div className="error">{error}</div>}
+                        {success && <div className="success">{success}</div>}
+
+                        <div style={{marginBottom: '24px'}}>
+                            <label className="form-label">Select Dashboard:</label>
+                            <select 
+                                className="form-select"
+                                value={selectedDashboard?.id || ''}
+                                onChange={(e) => e.target.value ? loadDashboard(e.target.value) : setSelectedDashboard(null)}
+                                style={{width: '300px'}}
+                            >
+                                <option value="">Choose a dashboard...</option>
+                                {dashboards.map(dashboard => (
+                                    <option key={dashboard.id} value={dashboard.id}>
+                                        {dashboard.name} {dashboard.is_default ? '(Default)' : ''}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {selectedDashboard && (
+                            <>
+                                <div style={{marginBottom: '24px'}}>
+                                    <h3>Widget Library</h3>
+                                    <p>Click widgets to add them to your dashboard:</p>
+                                    <div className="widget-library">
+                                        {widgets.filter(w => w.enabled).map(widget => (
+                                            <div 
+                                                key={widget.id} 
+                                                className="widget-library-item"
+                                                onClick={() => addWidgetToDashboard(widget.id)}
+                                            >
+                                                <strong>{widget.name}</strong>
+                                                <p style={{margin: '4px 0', fontSize: '0.9rem', color: '#666'}}>
+                                                    {widget.template_type}
+                                                </p>
+                                                <p style={{margin: 0, fontSize: '0.8rem', color: '#999'}}>
+                                                    {widget.description}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3>Dashboard: {selectedDashboard.name}</h3>
+                                    <div className="dashboard-canvas">
+                                        {dashboardWidgets.length === 0 ? (
+                                            <div style={{textAlign: 'center', padding: '40px', color: '#86868b'}}>
+                                                No widgets in this dashboard yet.<br/>
+                                                Click widgets from the library above to add them.
+                                            </div>
+                                        ) : (
+                                            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px'}}>
+                                                {dashboardWidgets.map(dw => (
+                                                    <div key={dw.id} className="canvas-widget">
+                                                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                                                            <strong>{dw.widget?.name}</strong>
+                                                            <button 
+                                                                className="btn btn-danger"
+                                                                onClick={() => removeWidgetFromDashboard(dw.widget_id)}
+                                                                style={{padding: '4px 8px', fontSize: '0.8rem'}}
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        </div>
+                                                        <p style={{margin: '8px 0', fontSize: '0.9rem', color: '#666'}}>
+                                                            {dw.widget?.template_type}
+                                                        </p>
+                                                        <p style={{margin: 0, fontSize: '0.8rem', color: '#999'}}>
+                                                            Order: {dw.display_order}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Main Admin App Component
+        function AdminApp() {
+            const [activeTab, setActiveTab] = useState('clients');
+
+            const tabs = [
+                { id: 'clients', label: '👥 Clients', component: ClientManagement },
+                { id: 'widgets', label: '🧩 Widget Builder', component: WidgetBuilder },
+                { id: 'dashboards', label: '📊 Dashboard Canvas', component: DashboardCanvas }
+            ];
+
+            const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || ClientManagement;
+
+            return (
+                <div className="admin-container">
+                    <div className="header">
+                        <h1>E-Paper Dashboard Admin Panel</h1>
+                        <p>Manage clients, create widgets, and design dashboards for your e-paper displays</p>
+                    </div>
+
+                    <nav className="nav-tabs">
+                        {tabs.map(tab => (
+                            <button
+                                key={tab.id}
+                                className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
+                                onClick={() => setActiveTab(tab.id)}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </nav>
+
+                    <ActiveComponent />
+                </div>
+            );
+        }
+
+        // Render the app
+        ReactDOM.render(<AdminApp />, document.getElementById('admin-root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Paper Dashboard</title>
+    <style>
+         
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: serif, serif;
+            font-size: 16px;
+            background-color: #ffffff;
+            color: #000000;
+            line-height: 1.4;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .dashboard {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .header {
+            text-align: center;
+            padding: 10px 0;
+            border-bottom: 2px solid #000000;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .widgets-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .widget {
+            flex: 1;
+            padding: 15px;
+            border-bottom: 1px solid #000000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .widget:last-child {
+            border-bottom: none;
+        }
+
+        .widget h2 {
+            font-size: 1.1em;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .widget-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .widget-error {
+            text-align: center;
+        }
+
+        .widget-error h3 {
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+
+        .error-message {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .error-hint {
+            font-size: 0.8em;
+            font-style: italic;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 5px 0;
+            border-top: 1px solid #000000;
+            font-size: 0.8em;
+            flex-shrink: 0;
+        }
+
+         
+        @media screen and (max-width: 800px) {
+            body {
+                font-size: 14px;
+            }
+            .widget {
+                padding: 10px;
+            }
+        }
+
+        @media screen and (max-height: 600px) {
+            .header {
+                padding: 5px 0;
+            }
+            .widget {
+                padding: 8px;
+            }
+            .footer {
+                padding: 3px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>E-Paper Dashboard</h1>
+        </div>
+
+        <div class="widgets-container">
+            
+            <div class="widget">
+                <div class="widget-content">
+                    &lt;div class=&#34;time-display&#34;&gt;
+  &lt;div class=&#34;time-main&#34;&gt;
+    &lt;span class=&#34;value value--huge&#34;&gt;14:50:58&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class=&#34;time-meta&#34;&gt;
+    &lt;span class=&#34;subtitle&#34;&gt;Saturday, July 26, 2025&lt;/span&gt;
+    &lt;span class=&#34;description&#34;&gt;Local Time&lt;/span&gt;
+    &lt;div class=&#34;flex items-center justify-center gap-md mt-sm&#34;&gt;
+      &lt;span class=&#34;meta&#34;&gt;Day 207&lt;/span&gt;
+      &lt;span class=&#34;meta&#34;&gt;•&lt;/span&gt;
+      &lt;span class=&#34;meta&#34;&gt;Week 30&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+                </div>
+            </div>
+            
+            <div class="widget">
+                <div class="widget-content">
+                    &lt;div class=&#34;metrics-grid&#34;&gt;
+  &lt;div class=&#34;metric-item&#34;&gt;
+    &lt;div class=&#34;metric-icon&#34;&gt;📊&lt;/div&gt;
+    &lt;div class=&#34;metric-info&#34;&gt;
+      &lt;span class=&#34;label&#34;&gt;CPU Usage&lt;/span&gt;
+      &lt;span class=&#34;value value--small&#34;&gt;0.1%&lt;/span&gt;
+      &lt;span class=&#34;meta&#34;&gt;8 cores&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;span class=&#34;status-indicator status-indicator--success&#34;&gt;●&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class=&#34;metric-item&#34;&gt;
+    &lt;div class=&#34;metric-icon&#34;&gt;🧠&lt;/div&gt;
+    &lt;div class=&#34;metric-info&#34;&gt;
+      &lt;span class=&#34;label&#34;&gt;Memory&lt;/span&gt;
+      &lt;span class=&#34;value value--small&#34;&gt;7.8%&lt;/span&gt;
+      &lt;span class=&#34;meta&#34;&gt;7.7GB total&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;span class=&#34;status-indicator status-indicator--success&#34;&gt;●&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class=&#34;metric-item&#34;&gt;
+    &lt;div class=&#34;metric-icon&#34;&gt;💾&lt;/div&gt;
+    &lt;div class=&#34;metric-info&#34;&gt;
+      &lt;span class=&#34;label&#34;&gt;Disk Space&lt;/span&gt;
+      &lt;span class=&#34;value value--small&#34;&gt;54.0%&lt;/span&gt;
+      &lt;span class=&#34;meta&#34;&gt;58.4GB total&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;span class=&#34;status-indicator status-indicator--success&#34;&gt;●&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;mt-md&#34;&gt;
+  &lt;span class=&#34;description text-center w-full flex justify-center&#34;&gt;
+    Linux 6.12.5-linuxkit
+  &lt;/span&gt;
+&lt;/div&gt;
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="footer">
+            Last updated: 14:50:59 | Render time: %!f(string=)%!(EXTRA string=1ms)ms
+        </div>
+    </div>
+
+    <script>
+        
+        function autoRefresh() {
+            const refreshInterval =  15  * 60 * 1000; 
+            
+            setTimeout(function() {
+                console.log('Auto-refreshing dashboard...');
+                window.location.reload();
+            }, refreshInterval);
+        }
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            autoRefresh();
+            console.log('Dashboard loaded. Auto-refresh set to 15 minutes.');
+        });
+
+        
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'r' || event.key === 'R') {
+                window.location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

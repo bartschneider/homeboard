@@ -15,10 +15,10 @@ import (
 
 // WidgetTestRunner handles widget testing in isolation
 type WidgetTestRunner struct {
-	executor    *widgets.Executor
-	pythonPath  string
+	executor       *widgets.Executor
+	pythonPath     string
 	defaultTimeout time.Duration
-	environment map[string]string
+	environment    map[string]string
 }
 
 // NewWidgetTestRunner creates a new widget test runner
@@ -37,10 +37,10 @@ func NewWidgetTestRunner(executor *widgets.Executor) *WidgetTestRunner {
 // TestWidget executes a widget test with given parameters
 func (tr *WidgetTestRunner) TestWidget(widget config.Widget, params map[string]interface{}, timeout int) TestResult {
 	start := time.Now()
-	
+
 	result := TestResult{
-		Parameters: params,
-		Timestamp:  start,
+		Parameters:  params,
+		Timestamp:   start,
 		Environment: tr.environment,
 	}
 
@@ -97,11 +97,11 @@ func (tr *WidgetTestRunner) TestWidget(widget config.Widget, params map[string]i
 // TestWidgetWithVariations tests a widget with multiple parameter sets
 func (tr *WidgetTestRunner) TestWidgetWithVariations(widget config.Widget, variations []map[string]interface{}) []TestResult {
 	results := make([]TestResult, len(variations))
-	
+
 	for i, params := range variations {
 		results[i] = tr.TestWidget(widget, params, 0) // Use default timeout
 	}
-	
+
 	return results
 }
 
@@ -119,7 +119,7 @@ func (tr *WidgetTestRunner) BenchmarkWidget(widget config.Widget, params map[str
 		result := tr.TestWidget(widget, params, 0)
 		results[i] = result
 		totalDuration += result.ExecutionTime
-		
+
 		if result.Success {
 			successCount++
 		}
@@ -127,21 +127,21 @@ func (tr *WidgetTestRunner) BenchmarkWidget(widget config.Widget, params map[str
 
 	// Calculate statistics
 	benchmark := BenchmarkResult{
-		Widget:         widget,
-		Parameters:     params,
-		Iterations:     iterations,
-		SuccessCount:   successCount,
-		SuccessRate:    float64(successCount) / float64(iterations),
-		TotalDuration:  totalDuration,
+		Widget:          widget,
+		Parameters:      params,
+		Iterations:      iterations,
+		SuccessCount:    successCount,
+		SuccessRate:     float64(successCount) / float64(iterations),
+		TotalDuration:   totalDuration,
 		AverageDuration: totalDuration / time.Duration(iterations),
-		Results:        results,
+		Results:         results,
 	}
 
 	// Calculate min/max execution times
 	if len(results) > 0 {
 		benchmark.MinDuration = results[0].ExecutionTime
 		benchmark.MaxDuration = results[0].ExecutionTime
-		
+
 		for _, result := range results {
 			if result.ExecutionTime < benchmark.MinDuration {
 				benchmark.MinDuration = result.ExecutionTime
@@ -211,11 +211,11 @@ func (tr *WidgetTestRunner) executeWidget(widget config.Widget, parametersJSON s
 		if ctx.Err() == context.DeadlineExceeded {
 			return outputStr, exitCode, fmt.Errorf("widget execution timed out after %v", timeout)
 		}
-		
+
 		if exitCode != 0 {
 			return outputStr, exitCode, fmt.Errorf("widget script exited with code %d: %s", exitCode, outputStr)
 		}
-		
+
 		return outputStr, exitCode, fmt.Errorf("widget execution failed: %v", err)
 	}
 
@@ -253,7 +253,7 @@ func (tr *WidgetTestRunner) validateOutput(output string) []string {
 // isValidHTML performs basic HTML validation
 func (tr *WidgetTestRunner) isValidHTML(output string) bool {
 	output = strings.TrimSpace(output)
-	
+
 	// Must start with < and end with >
 	if !strings.HasPrefix(output, "<") || !strings.HasSuffix(output, ">") {
 		return false
@@ -274,12 +274,12 @@ func (tr *WidgetTestRunner) isValidHTML(output string) bool {
 // containsUnsafeContent checks for potentially dangerous content
 func (tr *WidgetTestRunner) containsUnsafeContent(output string) bool {
 	lowerOutput := strings.ToLower(output)
-	
+
 	// Check for script tags
 	if strings.Contains(lowerOutput, "<script") {
 		return true
 	}
-	
+
 	// Check for dangerous attributes
 	dangerousAttrs := []string{
 		"javascript:",
@@ -288,47 +288,47 @@ func (tr *WidgetTestRunner) containsUnsafeContent(output string) bool {
 		"onerror=",
 		"onmouseover=",
 	}
-	
+
 	for _, attr := range dangerousAttrs {
 		if strings.Contains(lowerOutput, attr) {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
 // BenchmarkResult represents the result of widget benchmarking
 type BenchmarkResult struct {
-	Widget          config.Widget     `json:"widget"`
+	Widget          config.Widget          `json:"widget"`
 	Parameters      map[string]interface{} `json:"parameters"`
-	Iterations      int               `json:"iterations"`
-	SuccessCount    int               `json:"success_count"`
-	SuccessRate     float64           `json:"success_rate"`
-	TotalDuration   time.Duration     `json:"total_duration"`
-	AverageDuration time.Duration     `json:"average_duration"`
-	MinDuration     time.Duration     `json:"min_duration"`
-	MaxDuration     time.Duration     `json:"max_duration"`
-	Results         []TestResult      `json:"results"`
+	Iterations      int                    `json:"iterations"`
+	SuccessCount    int                    `json:"success_count"`
+	SuccessRate     float64                `json:"success_rate"`
+	TotalDuration   time.Duration          `json:"total_duration"`
+	AverageDuration time.Duration          `json:"average_duration"`
+	MinDuration     time.Duration          `json:"min_duration"`
+	MaxDuration     time.Duration          `json:"max_duration"`
+	Results         []TestResult           `json:"results"`
 }
 
 // TestSuite represents a collection of widget tests
 type TestSuite struct {
-	Name        string                    `json:"name"`
-	Description string                    `json:"description"`
-	Tests       []WidgetTestCase         `json:"tests"`
-	CreatedAt   time.Time                `json:"created_at"`
-	UpdatedAt   time.Time                `json:"updated_at"`
+	Name        string           `json:"name"`
+	Description string           `json:"description"`
+	Tests       []WidgetTestCase `json:"tests"`
+	CreatedAt   time.Time        `json:"created_at"`
+	UpdatedAt   time.Time        `json:"updated_at"`
 }
 
 // WidgetTestCase represents a single test case
 type WidgetTestCase struct {
-	Name         string                 `json:"name"`
-	Description  string                 `json:"description"`
-	Widget       config.Widget          `json:"widget"`
-	Parameters   map[string]interface{} `json:"parameters"`
-	Expected     ExpectedResult         `json:"expected"`
-	Timeout      int                    `json:"timeout"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Widget      config.Widget          `json:"widget"`
+	Parameters  map[string]interface{} `json:"parameters"`
+	Expected    ExpectedResult         `json:"expected"`
+	Timeout     int                    `json:"timeout"`
 }
 
 // ExpectedResult represents expected test outcomes
@@ -344,35 +344,35 @@ type ExpectedResult struct {
 // RunTestSuite executes a complete test suite
 func (tr *WidgetTestRunner) RunTestSuite(suite TestSuite) TestSuiteResult {
 	start := time.Now()
-	
+
 	results := make([]TestCaseResult, len(suite.Tests))
 	passCount := 0
-	
+
 	for i, testCase := range suite.Tests {
 		testResult := tr.TestWidget(testCase.Widget, testCase.Parameters, testCase.Timeout)
-		
+
 		// Validate against expected results
 		passed := tr.validateExpectedResult(testResult, testCase.Expected)
-		
+
 		results[i] = TestCaseResult{
 			TestCase: testCase,
 			Result:   testResult,
 			Passed:   passed,
 		}
-		
+
 		if passed {
 			passCount++
 		}
 	}
-	
+
 	return TestSuiteResult{
-		Suite:        suite,
-		Results:      results,
-		PassCount:    passCount,
-		TotalCount:   len(suite.Tests),
-		PassRate:     float64(passCount) / float64(len(suite.Tests)),
-		Duration:     time.Since(start),
-		ExecutedAt:   start,
+		Suite:      suite,
+		Results:    results,
+		PassCount:  passCount,
+		TotalCount: len(suite.Tests),
+		PassRate:   float64(passCount) / float64(len(suite.Tests)),
+		Duration:   time.Since(start),
+		ExecutedAt: start,
 	}
 }
 
@@ -382,7 +382,7 @@ func (tr *WidgetTestRunner) validateExpectedResult(result TestResult, expected E
 	if result.Success != expected.Success {
 		return false
 	}
-	
+
 	// Check content expectations (only if test was successful)
 	if result.Success {
 		// Check required text
@@ -391,14 +391,14 @@ func (tr *WidgetTestRunner) validateExpectedResult(result TestResult, expected E
 				return false
 			}
 		}
-		
+
 		// Check forbidden text
 		for _, text := range expected.NotContains {
 			if strings.Contains(result.Output, text) {
 				return false
 			}
 		}
-		
+
 		// Check length constraints
 		outputLen := len(result.Output)
 		if expected.MinLength > 0 && outputLen < expected.MinLength {
@@ -408,7 +408,7 @@ func (tr *WidgetTestRunner) validateExpectedResult(result TestResult, expected E
 			return false
 		}
 	}
-	
+
 	// Check duration constraint
 	if expected.MaxDuration > 0 {
 		maxDuration := time.Duration(expected.MaxDuration) * time.Millisecond
@@ -416,7 +416,7 @@ func (tr *WidgetTestRunner) validateExpectedResult(result TestResult, expected E
 			return false
 		}
 	}
-	
+
 	return true
 }
 

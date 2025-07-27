@@ -1,6 +1,6 @@
 {
   "refresh_interval": 15,
-  "server_port": 8081,
+  "server_port": 8080,
   "title": "E-Paper Dashboard",
   "theme": {
     "font_family": "serif",
@@ -10,24 +10,40 @@
   },
   "widgets": [
     {
-      "name": "Clock",
-      "script": "widgets/clock.py",
+      "name": "🕐 Current Time",
+      "script": "widgets/clock_enhanced.py",
       "enabled": true,
       "timeout": 10,
       "parameters": {
         "format": "%Y-%m-%d %H:%M:%S",
-        "timezone": "Local"
+        "timezone": "Local",
+        "show_seconds": true,
+        "show_date": true,
+        "show_timezone": true,
+        "date_format": "%A, %B %d, %Y"
       }
     },
     {
-      "name": "System Status",
-      "script": "widgets/system.py",
+      "name": "💻 System Status",
+      "script": "widgets/system_enhanced.py",
       "enabled": true,
       "timeout": 15,
       "parameters": {
         "show_cpu": true,
         "show_memory": true,
-        "show_disk": true
+        "show_disk": true,
+        "show_network": false,
+        "show_uptime": true
+      }
+    },
+    {
+      "name": "🌤️ Weather",
+      "script": "widgets/weather_enhanced.py",
+      "enabled": true,
+      "timeout": 20,
+      "parameters": {
+        "location": "London",
+        "timezone": "auto"
       }
     }
   ]

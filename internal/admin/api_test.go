@@ -22,7 +22,7 @@ func setupTestAPI(t *testing.T) (*AdminAPI, string, func()) {
 	// Create temporary config file
 	tempDir := t.TempDir()
 	configPath := filepath.Join(tempDir, "test_config.json")
-	
+
 	// Create test configuration
 	testConfig := &config.Config{
 		RefreshInterval: 15,
@@ -157,9 +157,9 @@ func TestUpdateConfigValidation(t *testing.T) {
 
 	// Test invalid configuration
 	invalidRequest := ConfigRequest{
-		RefreshInterval: -1, // Invalid
+		RefreshInterval: -1,  // Invalid
 		ServerPort:      100, // Invalid (too low)
-		Title:           "",   // Invalid (empty)
+		Title:           "",  // Invalid (empty)
 		Theme: config.Theme{
 			FontFamily: "",
 			FontSize:   "",

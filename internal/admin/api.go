@@ -15,25 +15,25 @@ import (
 
 // AdminAPI handles all admin panel API requests
 type AdminAPI struct {
-	configPath   string
-	executor     *widgets.Executor
-	validator    *ConfigValidator
-	backup       *BackupManager
-	websocket    *WebSocketManager
-	metrics      *MetricsCollector
-	testRunner   *WidgetTestRunner
+	configPath string
+	executor   *widgets.Executor
+	validator  *ConfigValidator
+	backup     *BackupManager
+	websocket  *WebSocketManager
+	metrics    *MetricsCollector
+	testRunner *WidgetTestRunner
 }
 
 // NewAdminAPI creates a new admin API handler
 func NewAdminAPI(configPath string, executor *widgets.Executor) *AdminAPI {
 	return &AdminAPI{
-		configPath:   configPath,
-		executor:     executor,
-		validator:    NewConfigValidator(),
-		backup:       NewBackupManager(configPath),
-		websocket:    NewWebSocketManager(),
-		metrics:      NewMetricsCollector(),
-		testRunner:   NewWidgetTestRunner(executor),
+		configPath: configPath,
+		executor:   executor,
+		validator:  NewConfigValidator(),
+		backup:     NewBackupManager(configPath),
+		websocket:  NewWebSocketManager(),
+		metrics:    NewMetricsCollector(),
+		testRunner: NewWidgetTestRunner(executor),
 	}
 }
 

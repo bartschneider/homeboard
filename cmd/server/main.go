@@ -13,7 +13,9 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/bartosz/homeboard/internal/api"
 	"github.com/bartosz/homeboard/internal/config"
+	"github.com/bartosz/homeboard/internal/db"
 	"github.com/bartosz/homeboard/internal/handlers"
 	"github.com/bartosz/homeboard/internal/widgets"
 )
@@ -21,6 +23,7 @@ import (
 const (
 	defaultConfigPath = "config.json"
 	defaultPythonPath = "python3"
+	defaultDBPath     = "homeboard.db"
 )
 
 func main() {
@@ -28,6 +31,9 @@ func main() {
 	var (
 		configPath = flag.String("config", defaultConfigPath, "Path to configuration file")
 		pythonPath = flag.String("python", defaultPythonPath, "Path to Python interpreter")
+		dbPath     = flag.String("db", defaultDBPath, "Path to SQLite database")
+		geminiKey  = flag.String("gemini-key", "", "Gemini API key for LLM features")
+		adkURL     = flag.String("adk-url", "http://localhost:8081", "ADK service URL")
 		verbose    = flag.Bool("verbose", false, "Enable verbose logging")
 	)
 	flag.Parse()
@@ -42,6 +48,27 @@ func main() {
 	log.Printf("Starting E-Paper Dashboard Server...")
 	log.Printf("Config path: %s", *configPath)
 	log.Printf("Python path: %s", *pythonPath)
+	log.Printf("Database path: %s", *dbPath)
+
+	// Check for Gemini API key from environment if not provided
+	if *geminiKey == "" {
+		*geminiKey = os.Getenv("GEMINI_API_KEY")
+	}
+
+	if *geminiKey != "" {
+		log.Printf("Gemini API integration enabled")
+	} else {
+		log.Printf("Warning: No Gemini API key provided. LLM features will be disabled.")
+	}
+
+	// Initialize database
+	database, err := db.NewDatabase(*dbPath)
+	if err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+	defer database.Close()
+
+	log.Printf("Database initialized successfully")
 
 	// Load initial configuration to validate and get server settings
 	cfg, err := config.LoadConfig(*configPath)
@@ -69,24 +96,36 @@ func main() {
 	}
 
 	// Create handlers
-	dashboardHandler, err := handlers.NewDashboardHandler(*configPath, executor)
+	dashboardHandler, err := handlers.NewDashboardHandler(*configPath, executor, database)
 	if err != nil {
 		log.Fatalf("Failed to create dashboard handler: %v", err)
 	}
 
 	adminHandler := handlers.NewAdminHandler(*configPath)
 
+	// Create API handlers
+	apiHandlers := api.NewAPIHandlers(database, *geminiKey, *adkURL)
+
 	// Set up HTTP routes
 	router := mux.NewRouter()
-	
+
+	// Static files (favicon, etc.)
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
+	router.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/favicon.ico")
+	})
+
 	// Dashboard route
 	router.Handle("/", dashboardHandler).Methods("GET")
-	
+
 	// Admin routes
 	router.Handle("/admin", adminHandler).Methods("GET", "POST")
 	router.HandleFunc("/admin/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/admin", http.StatusMovedPermanently)
 	})
+
+	// API routes
+	apiHandlers.RegisterRoutes(router)
 
 	// Health check endpoint
 	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -102,21 +141,26 @@ func main() {
 			http.Error(w, "Failed to load config", http.StatusInternalServerError)
 			return
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
-		
+
 		// Return safe config info (no sensitive parameters)
 		safeConfig := map[string]interface{}{
 			"title":            currentCfg.Title,
 			"refresh_interval": currentCfg.RefreshInterval,
 			"widget_count":     len(currentCfg.Widgets),
 			"enabled_widgets":  len(currentCfg.GetEnabledWidgets()),
-			"theme":           currentCfg.Theme,
+			"theme":            currentCfg.Theme,
 		}
-		
+
 		if err := json.NewEncoder(w).Encode(safeConfig); err != nil {
 			log.Printf("Error encoding config response: %v", err)
 		}
+	}).Methods("GET")
+
+	// Favicon route
+	router.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/favicon.ico")
 	}).Methods("GET")
 
 	// Set up HTTP server
@@ -135,11 +179,11 @@ func main() {
 	go func() {
 		<-sigChan
 		log.Printf("Shutdown signal received, stopping server...")
-		
+
 		// Give the server 30 seconds to finish any ongoing requests
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
-		
+
 		if err := server.Shutdown(shutdownCtx); err != nil {
 			log.Printf("Error during server shutdown: %v", err)
 		}
@@ -149,7 +193,7 @@ func main() {
 	log.Printf("Server starting on %s", cfg.GetServerAddress())
 	log.Printf("Dashboard available at: http://localhost:%d/", cfg.ServerPort)
 	log.Printf("Admin panel available at: http://localhost:%d/admin", cfg.ServerPort)
-	
+
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("Server failed to start: %v", err)
 	}

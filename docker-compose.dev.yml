@@ -1,0 +1,112 @@
+# E-Paper Dashboard Development Docker Compose
+# Optimized for development with hot reload and debugging
+
+version: '3.8'
+
+services:
+  # Development dashboard with volume mounts for hot reload
+  homeboard-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: homeboard-dev
+    ports:
+      - "8081:8081"
+      - "2345:2345"  # Delve debugger port
+    environment:
+      - CONFIG_PATH=/app/config.json
+      - PYTHONPATH=/app/widgets
+      - GO_ENV=development
+      - TZ=UTC
+    volumes:
+      # Source code mounting for hot reload
+      - .:/app
+      - go-mod-cache:/go/pkg/mod
+      
+      # Configuration
+      - ./config.json:/app/config.json
+      - ./widgets:/app/widgets
+    working_dir: /app
+    command: ["go", "run", "cmd/server/main.go", "-config", "/app/config.json", "-verbose"]
+    restart: unless-stopped
+    networks:
+      - homeboard-dev-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Development database for testing
+  postgres-dev:
+    image: postgres:15-alpine
+    container_name: homeboard-postgres-dev
+    environment:
+      - POSTGRES_DB=homeboard_dev
+      - POSTGRES_USER=homeboard
+      - POSTGRES_PASSWORD=devpassword123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+    networks:
+      - homeboard-dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U homeboard"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for development caching
+  redis-dev:
+    image: redis:alpine
+    container_name: homeboard-redis-dev
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-dev-data:/data
+    restart: unless-stopped
+    networks:
+      - homeboard-dev-network
+
+  # Mailhog for email testing
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: homeboard-mailhog
+    ports:
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI
+    restart: unless-stopped
+    networks:
+      - homeboard-dev-network
+
+  # Widget development environment
+  python-dev:
+    image: python:3.11-alpine
+    container_name: homeboard-python-dev
+    volumes:
+      - ./widgets:/app/widgets
+      - ./tests:/app/tests
+    working_dir: /app
+    command: ["tail", "-f", "/dev/null"]  # Keep container running
+    environment:
+      - PYTHONPATH=/app/widgets
+    networks:
+      - homeboard-dev-network
+
+volumes:
+  go-mod-cache:
+    driver: local
+  postgres-dev-data:
+    driver: local
+  redis-dev-data:
+    driver: local
+
+networks:
+  homeboard-dev-network:
+    driver: bridge
