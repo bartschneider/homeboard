@@ -786,9 +786,7 @@ const dashboardTemplate = `<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.Config.Title}}</title>
     <link rel="icon" href="/favicon.ico">
-    <style>
-` + designSystemCSS + `
-    </style>
+    <link rel="stylesheet" href="/static/css/modern-design-system.css">
 </head>
 <body>
     <div class="dashboard">

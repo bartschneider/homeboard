@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homeboard - Hello World</title>
+    <style>
+        /* E-Ink optimized styles for Kindle devices */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Caecilia", "Times New Roman", serif;
+            font-size: 18px;
+            line-height: 1.4;
+            color: #000000;
+            background-color: #ffffff;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .dashboard {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #000000;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .header .subtitle {
+            font-size: 16px;
+            font-style: italic;
+        }
+        
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .widget {
+            border: 2px solid #000000;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+        
+        .widget-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .widget-content {
+            text-align: center;
+        }
+        
+        .time-display {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .date-display {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .status-item {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #000000;
+        }
+        
+        .status-label {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .status-value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #000000;
+            margin-top: 30px;
+            font-size: 12px;
+        }
+        
+        .connection-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border: 1px solid #000000;
+            margin: 10px 0;
+        }
+        
+        .offline {
+            background-color: #f0f0f0;
+        }
+        
+        .online {
+            background-color: #ffffff;
+        }
+        
+        /* Responsive adjustments for different Kindle sizes */
+        @media screen and (max-width: 600px) {
+            body {
+                font-size: 16px;
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .time-display {
+                font-size: 28px;
+            }
+            
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media screen and (max-height: 800px) {
+            .content {
+                gap: 20px;
+            }
+            
+            .widget {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="header">
+            <h1>Homeboard Dashboard</h1>
+            <div class="subtitle">Hello World - Offline Mode</div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Time Widget -->
+            <div class="widget">
+                <div class="widget-title">Current Time</div>
+                <div class="widget-content">
+                    <div class="time-display" id="current-time">--:--:--</div>
+                    <div class="date-display" id="current-date">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Device Status Widget -->
+            <div class="widget">
+                <div class="widget-title">Device Status</div>
+                <div class="widget-content">
+                    <div class="connection-status offline" id="connection-status">
+                        OFFLINE MODE
+                    </div>
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <div class="status-label">Device Type</div>
+                            <div class="status-value">Kindle</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-label">Extension</div>
+                            <div class="status-value">KUAL</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-label">Version</div>
+                            <div class="status-value">1.0.0</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-label">Last Update</div>
+                            <div class="status-value" id="last-update">Never</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Welcome Message Widget -->
+            <div class="widget">
+                <div class="widget-title">Welcome Message</div>
+                <div class="widget-content">
+                    <p>Welcome to Homeboard for Kindle!</p>
+                    <p style="margin-top: 10px;">This is the default offline dashboard. To connect to your Homeboard server:</p>
+                    <ol style="text-align: left; margin-top: 15px; padding-left: 30px;">
+                        <li>Configure your server settings in KUAL</li>
+                        <li>Ensure your Kindle is connected to WiFi</li>
+                        <li>Launch the dashboard connection</li>
+                    </ol>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div>Homeboard KUAL Extension v1.0.0</div>
+            <div>Last refreshed: <span id="last-refresh">--:--:--</span></div>
+        </footer>
+    </div>
+
+    <script>
+        // JavaScript for dynamic content updates
+        function updateTime() {
+            const now = new Date();
+            
+            // Update time display
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('current-time').textContent = timeString;
+            
+            // Update date display
+            const dateString = now.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('current-date').textContent = dateString;
+            
+            // Update last refresh time
+            document.getElementById('last-refresh').textContent = timeString;
+        }
+        
+        function updateLastUpdate() {
+            const lastUpdate = localStorage.getItem('homeboard_last_update');
+            if (lastUpdate) {
+                const updateDate = new Date(parseInt(lastUpdate));
+                const updateString = updateDate.toLocaleTimeString('en-US', {
+                    hour12: false,
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                document.getElementById('last-update').textContent = updateString;
+            }
+        }
+        
+        function checkServerConnection() {
+            // Try to detect if we can reach the server
+            // This is a simple check - in reality, this would be more sophisticated
+            const configData = localStorage.getItem('homeboard_config');
+            const connectionStatus = document.getElementById('connection-status');
+            
+            if (configData) {
+                try {
+                    const config = JSON.parse(configData);
+                    if (config.server_url && config.server_url !== '') {
+                        // Attempt to ping server (this is simplified)
+                        fetch(`http://${config.server_url}:${config.server_port || 8080}/api/health`, {
+                            method: 'GET',
+                            timeout: 5000
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                connectionStatus.textContent = 'ONLINE';
+                                connectionStatus.className = 'connection-status online';
+                            }
+                        })
+                        .catch(() => {
+                            connectionStatus.textContent = 'OFFLINE MODE';
+                            connectionStatus.className = 'connection-status offline';
+                        });
+                    }
+                } catch (e) {
+                    // Config parsing failed, stay offline
+                }
+            }
+        }
+        
+        function loadDeviceInfo() {
+            // Try to get device-specific information
+            const deviceId = localStorage.getItem('homeboard_device_id');
+            if (deviceId) {
+                // Could display device ID somewhere if needed
+            }
+        }
+        
+        function initializeDashboard() {
+            updateTime();
+            updateLastUpdate();
+            checkServerConnection();
+            loadDeviceInfo();
+            
+            // Update time every second
+            setInterval(updateTime, 1000);
+            
+            // Check server connection every 30 seconds
+            setInterval(checkServerConnection, 30000);
+            
+            // Save current timestamp as last update
+            localStorage.setItem('homeboard_last_update', Date.now().toString());
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+        
+        // Handle page visibility changes (for e-ink refresh optimization)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                updateTime();
+                checkServerConnection();
+            }
+        });
+        
+        // Keyboard shortcuts for Kindle
+        document.addEventListener('keydown', function(event) {
+            switch(event.key) {
+                case 'r':
+                case 'R':
+                    // Refresh page
+                    location.reload();
+                    break;
+                case 'h':
+                case 'H':
+                    // Return to KUAL home
+                    if (window.parent !== window) {
+                        window.parent.location.href = 'mnt/us/extensions/kual/index.html';
+                    }
+                    break;
+            }
+        });
+        
+        // Periodically refresh the page for e-ink displays (every 15 minutes)
+        setTimeout(function() {
+            location.reload();
+        }, 15 * 60 * 1000);
+    </script>
+</body>
+</html>

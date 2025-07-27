@@ -23,6 +23,7 @@ type APIHandlers struct {
 	previewService     *WidgetPreviewService
 	chatService        *ChatSessionService
 	adkService         *ADKIntegrationService
+	deviceHandler      *DeviceHandler
 }
 
 // NewAPIHandlers creates new API handlers
@@ -32,6 +33,7 @@ func NewAPIHandlers(database *db.Database, geminiAPIKey string, adkServiceURL st
 	rssService := NewRSSService()
 	chatService := NewChatSessionService(enhancedLLMService, rssService)
 	adkService := NewADKIntegrationService(adkServiceURL)
+	deviceHandler := NewDeviceHandler(database)
 
 	return &APIHandlers{
 		clientRepo:         db.NewClientRepository(database),
@@ -43,6 +45,7 @@ func NewAPIHandlers(database *db.Database, geminiAPIKey string, adkServiceURL st
 		previewService:     NewWidgetPreviewService(llmService, enhancedLLMService, rssService),
 		chatService:        chatService,
 		adkService:         adkService,
+		deviceHandler:      deviceHandler,
 	}
 }
 
@@ -93,8 +96,16 @@ func (h *APIHandlers) RegisterRoutes(router *mux.Router) {
 	api.HandleFunc("/chat/widget-builder", h.ChatWidgetBuilder).Methods("POST")
 	api.HandleFunc("/chat/sessions/{sessionId}", h.GetChatSession).Methods("GET")
 
+	// Device endpoints (KUAL extension support)
+	api.HandleFunc("/devices/register", h.deviceHandler.RegisterDevice).Methods("POST")
+	api.HandleFunc("/devices", h.deviceHandler.ListDevices).Methods("GET")
+	api.HandleFunc("/devices/{device_id}", h.deviceHandler.GetDevice).Methods("GET")
+	api.HandleFunc("/devices/{device_id}/dashboard", h.deviceHandler.AssignDashboard).Methods("PUT")
+	api.HandleFunc("/device/{device_id}/dashboard", h.deviceHandler.GetDeviceDashboard).Methods("GET")
+
 	// Health endpoint
-	api.HandleFunc("/health", h.GetHealth).Methods("GET")
+	api.HandleFunc("/health", h.deviceHandler.HealthCheck).Methods("GET")
+	api.HandleFunc("/api/health", h.deviceHandler.HealthCheck).Methods("GET")
 
 	// Add CORS middleware
 	api.Use(corsMiddleware)

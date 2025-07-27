@@ -1,0 +1,40 @@
+{
+    "menu": [
+        {
+            "name": "Homeboard Dashboard",
+            "priority": 10,
+            "menu": [
+                {
+                    "name": "Launch Dashboard",
+                    "priority": 1,
+                    "action": "bin/launch_dashboard.sh",
+                    "params": ""
+                },
+                {
+                    "name": "Configure Server",
+                    "priority": 2,
+                    "action": "bin/configure_server.sh",
+                    "params": ""
+                },
+                {
+                    "name": "Hello World (Offline)",
+                    "priority": 3,
+                    "action": "bin/hello_world.sh",
+                    "params": ""
+                },
+                {
+                    "name": "Device Settings",
+                    "priority": 4,
+                    "action": "bin/device_settings.sh",
+                    "params": ""
+                },
+                {
+                    "name": "Connection Test",
+                    "priority": 5,
+                    "action": "bin/test_connection.sh",
+                    "params": ""
+                }
+            ]
+        }
+    ]
+}
