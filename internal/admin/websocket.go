@@ -102,9 +102,9 @@ func (wsm *WebSocketManager) registerClient(client *Client) {
 	welcomeMessage := AdminMessage{
 		Type: "connection_established",
 		Payload: map[string]interface{}{
-			"client_id":    client.id,
-			"server_time":  time.Now(),
-			"message":      "Connected to admin panel",
+			"client_id":   client.id,
+			"server_time": time.Now(),
+			"message":     "Connected to admin panel",
 		},
 		Timestamp: time.Now(),
 	}

@@ -149,10 +149,10 @@ func TestConfigValidator(t *testing.T) {
 			ServerPort:      8081,
 			Title:           "Test Dashboard",
 			Theme: config.Theme{
-				FontFamily: "",              // Invalid (empty)
-				FontSize:   "invalid-size",  // Invalid format
-				Background: "not-a-color",   // Invalid color
-				Foreground: "#gggggg",       // Invalid hex color
+				FontFamily: "",             // Invalid (empty)
+				FontSize:   "invalid-size", // Invalid format
+				Background: "not-a-color",  // Invalid color
+				Foreground: "#gggggg",      // Invalid hex color
 			},
 			Widgets: []config.Widget{},
 		}
@@ -315,8 +315,8 @@ func TestConfigValidator(t *testing.T) {
 
 	t.Run("Warnings", func(t *testing.T) {
 		req := ConfigRequest{
-			RefreshInterval: 2, // Will generate warning
-			ServerPort:      80, // Will generate warning (reserved port)
+			RefreshInterval: 2,                                              // Will generate warning
+			ServerPort:      80,                                             // Will generate warning (reserved port)
 			Title:           "Test <script>alert('xss')</script> Dashboard", // Will generate warning
 			Theme: config.Theme{
 				FontFamily: "serif",
@@ -577,9 +577,9 @@ func TestValidationEdgeCases(t *testing.T) {
 
 // Helper function
 func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || (len(s) > len(substr) && 
-		(s[:len(substr)] == substr || s[len(s)-len(substr):] == substr || 
-		 indexOf(s, substr) >= 0)))
+	return len(s) >= len(substr) && (s == substr || (len(s) > len(substr) &&
+		(s[:len(substr)] == substr || s[len(s)-len(substr):] == substr ||
+			indexOf(s, substr) >= 0)))
 }
 
 func indexOf(s, substr string) int {

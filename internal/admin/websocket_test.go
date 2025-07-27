@@ -584,7 +584,7 @@ func TestMessageBroadcaster(t *testing.T) {
 func TestClientIDGeneration(t *testing.T) {
 	t.Run("UniqueIDs", func(t *testing.T) {
 		ids := make(map[string]bool)
-		
+
 		// Generate multiple IDs
 		for i := 0; i < 100; i++ {
 			id := generateClientID()
@@ -592,7 +592,7 @@ func TestClientIDGeneration(t *testing.T) {
 				t.Errorf("Generated duplicate client ID: %s", id)
 			}
 			ids[id] = true
-			
+
 			if !strings.HasPrefix(id, "client_") {
 				t.Errorf("Client ID should start with 'client_', got: %s", id)
 			}
@@ -603,7 +603,7 @@ func TestClientIDGeneration(t *testing.T) {
 func TestNotificationIDGeneration(t *testing.T) {
 	t.Run("UniqueNotificationIDs", func(t *testing.T) {
 		ids := make(map[string]bool)
-		
+
 		// Generate multiple IDs
 		for i := 0; i < 100; i++ {
 			id := generateNotificationID()
@@ -611,7 +611,7 @@ func TestNotificationIDGeneration(t *testing.T) {
 				t.Errorf("Generated duplicate notification ID: %s", id)
 			}
 			ids[id] = true
-			
+
 			if !strings.HasPrefix(id, "notif_") {
 				t.Errorf("Notification ID should start with 'notif_', got: %s", id)
 			}
@@ -626,7 +626,7 @@ func TestConcurrentWebSocketOperations(t *testing.T) {
 	t.Run("ConcurrentClientRegistration", func(t *testing.T) {
 		numClients := 50
 		clients := make([]*Client, numClients)
-		
+
 		// Register clients concurrently
 		for i := 0; i < numClients; i++ {
 			go func(index int) {
@@ -672,7 +672,7 @@ func TestConcurrentWebSocketOperations(t *testing.T) {
 		// Register some clients
 		numClients := 10
 		clients := make([]*Client, numClients)
-		
+
 		for i := 0; i < numClients; i++ {
 			client := &Client{
 				conn:     nil,
@@ -710,7 +710,7 @@ func TestConcurrentWebSocketOperations(t *testing.T) {
 			if client == nil {
 				continue
 			}
-			
+
 			receivedCount := 0
 			for {
 				select {
@@ -720,7 +720,7 @@ func TestConcurrentWebSocketOperations(t *testing.T) {
 					goto checkCount
 				}
 			}
-			
+
 		checkCount:
 			if receivedCount != numMessages {
 				t.Errorf("Client %d expected %d messages, got %d", i, numMessages, receivedCount)

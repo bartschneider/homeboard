@@ -24,20 +24,20 @@ type MetricsCollector struct {
 
 // WidgetMetrics represents metrics for a single widget
 type WidgetMetrics struct {
-	WidgetName      string        `json:"widget_name"`
-	Status          string        `json:"status"`
-	LastExecution   time.Time     `json:"last_execution"`
-	ExecutionTime   time.Duration `json:"execution_time"`
-	ExecutionCount  int64         `json:"execution_count"`
-	SuccessCount    int64         `json:"success_count"`
-	ErrorCount      int64         `json:"error_count"`
-	ErrorMessage    string        `json:"error_message,omitempty"`
-	AverageTime     time.Duration `json:"average_time"`
-	MinTime         time.Duration `json:"min_time"`
-	MaxTime         time.Duration `json:"max_time"`
-	LastOutput      string        `json:"last_output,omitempty"`
-	CreatedAt       time.Time     `json:"created_at"`
-	UpdatedAt       time.Time     `json:"updated_at"`
+	WidgetName     string        `json:"widget_name"`
+	Status         string        `json:"status"`
+	LastExecution  time.Time     `json:"last_execution"`
+	ExecutionTime  time.Duration `json:"execution_time"`
+	ExecutionCount int64         `json:"execution_count"`
+	SuccessCount   int64         `json:"success_count"`
+	ErrorCount     int64         `json:"error_count"`
+	ErrorMessage   string        `json:"error_message,omitempty"`
+	AverageTime    time.Duration `json:"average_time"`
+	MinTime        time.Duration `json:"min_time"`
+	MaxTime        time.Duration `json:"max_time"`
+	LastOutput     string        `json:"last_output,omitempty"`
+	CreatedAt      time.Time     `json:"created_at"`
+	UpdatedAt      time.Time     `json:"updated_at"`
 }
 
 // NewMetricsCollector creates a new metrics collector
@@ -423,16 +423,16 @@ func (mc *MetricsCollector) GetMetricsSummary() map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"uptime":            time.Since(mc.startTime),
-		"total_widgets":     totalWidgets,
-		"active_widgets":    activeWidgets,
-		"error_widgets":     errorWidgets,
-		"total_executions":  totalExecutions,
-		"total_errors":      totalErrors,
-		"success_rate":      successRate,
-		"requests_count":    mc.requestCount,
-		"memory_usage":      mc.systemMetrics.MemoryUsage,
-		"cpu_usage":         mc.systemMetrics.CPUUsage,
+		"uptime":           time.Since(mc.startTime),
+		"total_widgets":    totalWidgets,
+		"active_widgets":   activeWidgets,
+		"error_widgets":    errorWidgets,
+		"total_executions": totalExecutions,
+		"total_errors":     totalErrors,
+		"success_rate":     successRate,
+		"requests_count":   mc.requestCount,
+		"memory_usage":     mc.systemMetrics.MemoryUsage,
+		"cpu_usage":        mc.systemMetrics.CPUUsage,
 	}
 }
 
@@ -441,7 +441,7 @@ func (mc *MetricsCollector) GetMetricsSummary() map[string]interface{} {
 // GetHealthStatus returns overall system health status
 func (mc *MetricsCollector) GetHealthStatus() map[string]interface{} {
 	summary := mc.GetMetricsSummary()
-	
+
 	// Determine health status
 	health := "healthy"
 	if summary["success_rate"].(float64) < 80 {
@@ -454,7 +454,7 @@ func (mc *MetricsCollector) GetHealthStatus() map[string]interface{} {
 	// Check for recent errors
 	recentErrors := 0
 	cutoffTime := time.Now().Add(-10 * time.Minute)
-	
+
 	mc.logMutex.RLock()
 	for _, entry := range mc.logEntries {
 		if entry.Level == "error" && entry.Timestamp.After(cutoffTime) {
@@ -471,12 +471,12 @@ func (mc *MetricsCollector) GetHealthStatus() map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"status":        health,
-		"uptime":        summary["uptime"],
-		"success_rate":  summary["success_rate"],
-		"recent_errors": recentErrors,
+		"status":         health,
+		"uptime":         summary["uptime"],
+		"success_rate":   summary["success_rate"],
+		"recent_errors":  recentErrors,
 		"active_widgets": summary["active_widgets"],
-		"memory_usage":  summary["memory_usage"],
-		"timestamp":     time.Now(),
+		"memory_usage":   summary["memory_usage"],
+		"timestamp":      time.Now(),
 	}
 }

@@ -1,61 +1,175 @@
-# E-Paper Homelab Dashboard
+# E-Paper Dashboard
 
-A lightweight, extensible dashboard system designed for e-paper displays, specifically optimized for jailbroken Amazon Kindle devices.
+A comprehensive dashboard system designed for E-Paper displays with real-time admin panel, widget management, and robust quality enforcement.
 
 ## Features
 
-- **Go Backend**: Fast, concurrent widget execution with hot-reloading configuration
-- **Python Widget System**: Extensible widget framework for custom data sources
-- **E-Paper Optimized**: High-contrast, static design perfect for e-ink displays
-- **Auto-Refresh**: Configurable refresh intervals with JavaScript-based reloading
-- **Admin Panel**: Web-based configuration interface (placeholder)
-- **Concurrent Processing**: All widgets execute in parallel for minimal load times
+### Core Dashboard
+- **E-Paper Optimized**: High contrast design for E-Paper displays
+- **Widget System**: Modular Python widgets for dynamic content
+- **Real-time Updates**: Configurable refresh intervals
+- **Responsive Design**: Works on various screen sizes
+
+### Admin Panel (NEW!)
+- **REST API**: Complete CRUD operations for configuration and widgets
+- **Real-time WebSocket**: Live updates and notifications
+- **Widget Testing**: Isolated testing with performance metrics
+- **Configuration Validation**: Security checks and best practices
+- **Backup/Restore**: Version control for configurations
+- **System Monitoring**: Performance metrics and logging
+
+### Quality Enforcement
+- **Pre-commit Hooks**: Comprehensive code quality enforcement
+- **No Exceptions Policy**: All checks must pass before commits
+- **Multi-language Support**: Go linting, Python validation
+- **Security Scanning**: Automated vulnerability detection
+- **Test Coverage**: Mandatory unit and integration tests
 
 ## Quick Start
 
-### Prerequisites
-
-- Go 1.21 or higher
-- Python 3.7+ with `psutil` and `pytz` packages
-- Jailbroken Kindle with KUAL (for device deployment)
-
 ### Installation
 
-1. **Clone and setup the project:**
 ```bash
-git clone <repository-url>
+# Clone the repository
+git clone git@github.com:bartschneider/homeboard.git
 cd homeboard
-go mod tidy
+
+# Install dependencies
+make install
+
+# Install quality enforcement hooks
+make hooks
+
+# Build and run
+make build
+make run
 ```
 
-2. **Install Python dependencies:**
-```bash
-pip3 install psutil pytz
-```
-
-3. **Configure the dashboard:**
-Edit `config.json` to customize widgets and settings.
-
-4. **Run the server:**
-```bash
-go run cmd/server/main.go
-```
-
-5. **Access the dashboard:**
-- Dashboard: http://localhost:8080
-- Admin Panel: http://localhost:8080/admin
-- Health Check: http://localhost:8080/health
-
-### Command Line Options
+### Docker Deployment (Recommended)
 
 ```bash
-go run cmd/server/main.go [options]
+# Quick preview with Docker
+make docker
 
-Options:
-  -config string    Path to configuration file (default "config.json")
-  -python string    Path to Python interpreter (default "python3")
-  -verbose          Enable verbose logging
+# Development with hot reload
+make docker-dev
+
+# Production with monitoring
+make docker-prod
+
+# Access points:
+# Dashboard: http://localhost:8081
+# Admin Panel: http://localhost:8081/admin
+# Nginx Proxy: http://localhost (production)
 ```
+
+### Development Workflow
+
+```bash
+# Development mode with hot reload
+make dev
+
+# Run comprehensive tests
+make test
+
+# Quick validation (recommended before commits)
+make validate
+
+# Format all code
+make format
+
+# Full quality check
+make lint
+```
+
+## Admin Panel API
+
+The admin panel provides a comprehensive REST API for managing the dashboard:
+
+### Configuration Management
+- `GET /api/admin/config` - Get current configuration
+- `PUT /api/admin/config` - Update configuration
+- `POST /api/admin/config/validate` - Validate configuration
+- `POST /api/admin/config/backup` - Create backup
+- `GET /api/admin/config/backups` - List backups
+- `POST /api/admin/config/restore/{id}` - Restore backup
+
+### Widget Management
+- `GET /api/admin/widgets` - List all widgets
+- `POST /api/admin/widgets` - Create new widget
+- `PUT /api/admin/widgets/{id}` - Update widget
+- `DELETE /api/admin/widgets/{id}` - Delete widget
+- `POST /api/admin/widgets/{id}/toggle` - Toggle widget enable/disable
+- `POST /api/admin/widgets/{id}/test` - Test widget execution
+
+### System Monitoring
+- `GET /api/admin/status` - System status and health
+- `GET /api/admin/metrics` - Performance metrics
+- `GET /api/admin/logs` - System logs with filtering
+
+### WebSocket Real-time Updates
+Connect to `/ws/admin` for live updates:
+- Configuration changes
+- Widget status updates
+- System metrics
+- Log entries
+- Error notifications
+
+## Quality Enforcement System
+
+This project enforces the highest code quality standards with **no exceptions**:
+
+### Pre-commit Hooks
+Every commit automatically runs:
+- ✅ Go formatting and import organization
+- ✅ Go vet analysis and complexity checks
+- ✅ Complete unit test suite with race detection
+- ✅ Python syntax and formatting validation
+- ✅ Security scanning and secret detection
+- ✅ File validation and documentation checks
+
+### Make Targets
+```bash
+make hooks      # Install pre-commit hook system
+make validate   # Run comprehensive validation
+make lint       # Code quality and linting
+make test       # Full test suite including widgets
+make test-quick # Go tests only (faster)
+make format     # Auto-format all code
+make security   # Security vulnerability scan
+make coverage   # Generate test coverage report
+```
+
+### No Bypass Policy
+- ⚠️ `--no-verify` flag is blocked in CI/CD
+- ⚠️ All tests must pass with 100% success rate
+- ⚠️ Code coverage thresholds are enforced
+- ⚠️ Security scans must show no vulnerabilities
+
+## Architecture
+
+### Backend (Go)
+- **HTTP Server**: Gorilla Mux router with CORS support
+- **WebSocket Manager**: Real-time client communication
+- **Configuration System**: JSON-based with hot reloading
+- **Widget Executor**: Isolated Python script execution
+- **Validation Framework**: Security and best practices enforcement
+- **Backup System**: Version control with integrity checks
+- **Metrics Collection**: Performance monitoring and logging
+
+### Frontend (Planned)
+- **Modern SPA**: React/Vue with TypeScript
+- **Real-time Updates**: WebSocket integration
+- **Component Library**: Reusable UI components
+- **Theme System**: Dark/light mode support
+- **Responsive Design**: Mobile-first approach
+
+### Widget System
+- **Python Scripts**: Isolated execution environment
+- **Parameter Validation**: Type checking and sanitization
+- **Performance Monitoring**: Execution time and resource usage
+- **Error Handling**: Graceful failure and recovery
+- **Testing Framework**: Automated validation and benchmarking
 
 ## Project Structure
 

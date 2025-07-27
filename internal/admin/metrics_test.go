@@ -25,7 +25,7 @@ func TestMetricsCollector(t *testing.T) {
 
 	t.Run("SystemMetricsUpdate", func(t *testing.T) {
 		collector.UpdateSystemMetrics()
-		
+
 		metrics := collector.GetAllMetrics()
 		if _, exists := metrics["system_metrics"]; !exists {
 			t.Error("Expected 'system_metrics' to exist")
@@ -129,7 +129,7 @@ func TestWidgetMetrics(t *testing.T) {
 
 	t.Run("MultipleExecutions", func(t *testing.T) {
 		widgetName := "multi_widget"
-		
+
 		// Record multiple executions with different durations
 		durations := []time.Duration{
 			100 * time.Millisecond,
@@ -166,7 +166,7 @@ func TestWidgetMetrics(t *testing.T) {
 
 	t.Run("ResetWidgetMetrics", func(t *testing.T) {
 		widgetName := "reset_widget"
-		
+
 		// Record some executions
 		collector.RecordWidgetExecution(widgetName, 100*time.Millisecond, true, "output", "")
 		collector.RecordWidgetExecution(widgetName, 200*time.Millisecond, false, "", "error")
@@ -209,7 +209,7 @@ func TestWidgetMetrics(t *testing.T) {
 
 	t.Run("GetWidgetStatus", func(t *testing.T) {
 		widgetName := "status_widget"
-		
+
 		// Record execution
 		collector.RecordWidgetExecution(widgetName, 100*time.Millisecond, true, "test output", "")
 
@@ -235,7 +235,7 @@ func TestWidgetMetrics(t *testing.T) {
 
 	t.Run("GetAllWidgetMetrics", func(t *testing.T) {
 		collector := NewMetricsCollector()
-		
+
 		// Record metrics for multiple widgets
 		widgets := []string{"widget1", "widget2", "widget3"}
 		for _, widget := range widgets {
@@ -400,7 +400,7 @@ func TestPerformanceMetrics(t *testing.T) {
 		// Add successful executions
 		collector.RecordWidgetExecution("widget1", 100*time.Millisecond, true, "output", "")
 		collector.RecordWidgetExecution("widget1", 200*time.Millisecond, true, "output", "")
-		
+
 		// Add failed execution
 		collector.RecordWidgetExecution("widget2", 150*time.Millisecond, false, "", "error")
 
