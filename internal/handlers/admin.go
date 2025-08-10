@@ -33,8 +33,8 @@ func (h *AdminHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (h *AdminHandler) handleGetAdmin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	// Serve the React admin panel
-	http.ServeFile(w, r, "static/admin.html")
+	// Serve the Svelte admin panel (built assets)
+	http.ServeFile(w, r, "static/admin/index.html")
 }
 
 // handlePostAdmin handles configuration updates (placeholder)
